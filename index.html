@@ -1,25 +1,71 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>职业规划与人生道路建议</title>
   <style>
-    :root{--bg:#f5f7fb;--panel:#fff;--panel2:#f2f5fa;--line:#d7deea;--text:#18202d;--muted:#5f6b7b;--accent:#5d84c8;--accent2:#7ea8d9;--shadow:0 12px 32px rgba(23,38,67,.08)}
+    :root{
+      --bg:#f5f7fb;
+      --panel:#ffffff;
+      --panel2:#f2f5fa;
+      --line:#d7deea;
+      --text:#18202d;
+      --muted:#5f6b7b;
+      --accent:#5d84c8;
+      --accent2:#7ea8d9;
+      --shadow:0 12px 32px rgba(23, 38, 67, .08);
+      --radius:16px;
+    }
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+    body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
     button,input{font:inherit}
-    .wrap{max-width:1240px;margin:0 auto;padding:24px}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+    .wrap,
+    .wrap *{
+      caret-color:transparent;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+    button,
+    .choice,
+    .card,
+    .pill,
+    [role="button"]{
+      caret-color:transparent;
+      user-select:none;
+      -webkit-user-select:none;
+      cursor:default;
+    }
+    #mbtiSelectTitle,
+    #mbtiSelectDesc,
+    #mbtiShell .section-title,
+    #mbtiShell .section-title *{
+      caret-color:transparent;
+      user-select:none;
+      -webkit-user-select:none;
+      cursor:default;
+    }
+    button:focus,
+    .choice:focus,
+    .card:focus,
+    [role="button"]:focus{
+      outline:none;
+    }
+    img,canvas,svg{max-width:100%}
+    .wrap{max-width:1240px;margin:0 auto;padding:16px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
     .pad{padding:24px}
-    h1{margin:0;font-size:40px;line-height:1.15}
-    h2{margin:0 0 12px;font-size:22px}
+    h1{margin:0;font-size:clamp(28px,4vw,40px);line-height:1.15}
+    h2{margin:0 0 12px;font-size:clamp(18px,2.5vw,22px)}
     p{margin:0;color:var(--muted);line-height:1.7}
-    .topbar{display:flex;justify-content:flex-end;margin-bottom:10px}
-    .lang-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;color:var(--text);cursor:pointer;font-weight:700}
-    .wide-title{width:100%;padding:28px;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)}
-    .nav{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-start}
-    .btn{border:1px solid transparent;border-radius:12px;padding:13px 18px;cursor:pointer;font-weight:700}
+    .topbar{display:flex;justify-content:flex-end;margin-bottom:10px;position:sticky;top:0;z-index:20;padding-top:8px;pointer-events:none}
+    .topbar .lang-btn{pointer-events:auto}
+    .lang-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;color:var(--text);cursor:pointer;font-weight:700;white-space:nowrap}
+    .wide-title{width:100%;padding:22px;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)}
+    .title-row{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .title-copy{max-width:920px}
+    .btn{min-height:44px;border:1px solid transparent;border-radius:12px;padding:12px 16px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}
     .btn.primary{background:linear-gradient(180deg,var(--accent) 0%, #4f75b3 100%);color:#fff}
     .btn.secondary{background:#fff;color:var(--muted);border-color:var(--line)}
     .btn.secondary.ghost{background:#f8fafc}
@@ -27,23 +73,23 @@
     .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
     .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
     .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-    .card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
     .card.soft{background:#f7f9fd}
-    .pill{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12px}
+    .pill{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12px;max-width:100%;overflow-wrap:anywhere}
     .hidden{display:none !important}
     .section{margin-top:18px}
     .section-title{margin-bottom:14px}
     .section-title h2{margin-bottom:6px}
-    .choice{width:100%;text-align:left;margin-top:8px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text);padding:12px 14px;cursor:pointer}
+    .choice{width:100%;min-height:44px;text-align:left;margin-top:8px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text);padding:12px 14px;cursor:pointer;overflow-wrap:anywhere}
     .choice.active{border-color:var(--accent);background:#edf3ff}
     .choice:hover{background:#f8fbff}
     .bar{height:10px;background:#e9eef6;border-radius:999px;overflow:hidden}
     .bar>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
     .muted{color:var(--muted)}
-    .qtext{font-size:20px;line-height:1.6;min-height:88px;color:var(--text)}
+    .qtext{font-size:clamp(18px,2.5vw,20px);line-height:1.6;min-height:88px;color:var(--text);overflow-wrap:anywhere}
     .option-list{display:grid;gap:10px}
-    .report-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .report-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;min-width:0}
     .metric{margin:10px 0}
     .metric .row{font-size:13px;margin-bottom:6px}
     canvas{max-width:100%;display:block}
@@ -51,14 +97,55 @@
     .lead{font-size:16px}
     .section-soft{background:linear-gradient(180deg,#fff 0%, #fbfcfe 100%)}
     .question-shell{max-width:920px;margin:0 auto}
-    .title-row{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
-    .title-copy{max-width:920px}
-    @media (max-width:1020px){.grid4,.grid3,.grid2,.report-grid{grid-template-columns:1fr}h1{font-size:32px}.title-row{flex-direction:column}}
+    .stage{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+    .report-card-list{display:grid;gap:10px}
+    .report-card-list .card{width:100%}
+    .subtle{font-size:13px;color:var(--muted)}
+    .mbti-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+
+    @media (max-width:1020px){
+      .grid4,.grid3,.grid2,.report-grid,.mbti-grid{grid-template-columns:1fr}
+      .title-row{flex-direction:column}
+    }
+    @media (max-width:768px){
+      .wrap{padding:12px}
+      .pad{padding:16px}
+      .title-row{gap:10px}
+      .topbar{margin-bottom:8px}
+      .lang-btn{padding:9px 12px;font-size:14px}
+      .wide-title{padding:18px}
+      h1{font-size:28px}
+      .lead{font-size:14px}
+      .grid4,.grid3,.grid2,.report-grid,.mbti-grid{grid-template-columns:1fr}
+      .grid4 .card,.grid3 .card,.grid2 .card{padding:14px}
+      .button-row{gap:10px}
+      .btn{min-height:44px;padding:11px 14px;font-size:14px}
+      .choice{min-height:44px;padding:11px 12px;font-size:14px}
+      .qtext{font-size:18px}
+      .section{margin-top:14px}
+      .report-grid{gap:12px}
+      .report-card-list .card{padding:14px}
+    }
+    @media (max-width:430px){
+      .wrap{padding:10px}
+      .pad{padding:14px}
+      h1{font-size:26px}
+      h2{font-size:18px}
+      .wide-title{padding:16px}
+      .btn,.choice{width:100%}
+      .button-row{flex-direction:column;align-items:stretch}
+      .button-row .btn{width:100%}
+      .row{flex-direction:column;align-items:flex-start}
+      .topbar{justify-content:flex-end}
+      .pill{max-width:100%}
+      canvas{height:auto}
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><button class="lang-btn" id="langBtn" onclick="toggleLang()">中文 / English</button></div>
+  <div class="topbar"><button class="lang-btn" id="langBtn" type="button" onclick="toggleLang()">中文 / English</button></div>
+
   <section class="panel wide-title">
     <div class="title-row">
       <div class="title-copy">
@@ -81,20 +168,56 @@
     </div>
   </section>
 
-  <section class="section"><div class="button-row"><button class="btn primary" id="startBtn" onclick="startSurvey()"></button><button class="btn secondary ghost" id="resetBtn" onclick="resetAll()"></button></div></section>
+  <section class="section">
+    <div class="button-row" style="justify-content:flex-start">
+      <button class="btn primary" id="startBtn" type="button" onclick="startSurvey()"></button>
+      <button class="btn secondary ghost" id="resetBtn" type="button" onclick="resetAll()"></button>
+    </div>
+  </section>
+
+  <section id="mbtiShell" class="panel pad section hidden">
+    <div class="section-title">
+      <h2 id="mbtiSelectTitle"></h2>
+      <p id="mbtiSelectDesc"></p>
+    </div>
+    <div id="mbtiGrid" class="mbti-grid"></div>
+    <div class="button-row" style="margin-top:16px;justify-content:flex-start">
+      <button class="btn primary" id="mbtiContinueBtn" type="button" onclick="confirmMBTI()"></button>
+      <button class="btn secondary ghost" id="mbtiSkipBtn" type="button" onclick="skipMBTI()"></button>
+    </div>
+  </section>
+
   <section id="surveyShell" class="panel pad section hidden">
     <div class="question-shell">
-      <div class="row"><div><div class="stage" id="stageName"></div><h2 id="surveyTitle"></h2></div><div class="muted" id="progressText"></div></div>
+      <div class="row">
+        <div>
+          <div class="stage" id="stageName"></div>
+          <h2 id="surveyTitle"></h2>
+        </div>
+        <div class="muted" id="progressText"></div>
+      </div>
       <div class="bar" style="margin:10px 0 18px"><div id="progressBar" style="width:0%"></div></div>
       <div class="qtext" id="questionText"></div>
       <div id="options" class="option-list"></div>
-      <div class="button-row" style="margin-top:16px;justify-content:space-between"><button class="btn secondary" onclick="prevQ()">返回</button><button class="btn primary" id="nextBtn" onclick="nextQ()">下一题</button></div>
+      <div class="button-row" style="margin-top:16px;justify-content:space-between">
+        <button class="btn secondary" id="prevBtn" type="button" onclick="prevQ()"></button>
+        <button class="btn primary" id="nextBtn" type="button" onclick="nextQ()"></button>
+      </div>
     </div>
   </section>
-  <section id="loading" class="panel pad section hidden"><h2 id="loadingTitle"></h2><p id="loadingDesc"></p></section>
+
+  <section id="loading" class="panel pad section hidden">
+    <h2 id="loadingTitle"></h2>
+    <p id="loadingDesc"></p>
+  </section>
+
   <section id="report" class="hidden section">
     <div class="panel pad section">
-      <div class="row" style="margin-bottom:12px"><div class="pill" id="mbtiTag"></div><button class="btn secondary ghost" onclick="goHome()" id="goHomeBtn"></button></div>
+      <div class="row" style="margin-bottom:12px">
+        <div class="pill" id="mbtiTag"></div>
+        <button class="btn secondary ghost" id="goHomeBtn" type="button" onclick="goHome()"></button>
+      </div>
+
       <div class="report-grid">
         <div class="card soft">
           <h2 id="reportTitle"></h2>
@@ -104,16 +227,26 @@
             <div class="card" style="background:#fff"><strong id="valuesSummaryTitle"></strong><p id="valuesSummary"></p></div>
           </div>
           <div class="grid2" style="margin-top:14px">
-            <div class="card" style="background:#fff"><strong>Big Five</strong><div id="bigFive"></div></div>
-            <div class="card" style="background:#fff"><strong id="radarTitle"></strong><canvas id="radar" width="320" height="320"></canvas></div>
+            <div class="card" style="background:#fff">
+              <strong id="bigFiveTitle"></strong>
+              <div id="bigFive"></div>
+            </div>
+            <div class="card" style="background:#fff">
+              <strong id="radarTitle"></strong>
+              <canvas id="radar" width="320" height="320"></canvas>
+            </div>
           </div>
         </div>
-        <div class="card soft"><h2 id="careerTitle"></h2><div id="careers"></div></div>
+        <div class="card soft">
+          <h2 id="careerTitle"></h2>
+          <div id="careers" class="report-card-list"></div>
+        </div>
       </div>
+
       <div class="grid3 section">
-        <div class="card soft"><h2 id="avoidTitle"></h2><div id="avoid"></div></div>
-        <div class="card soft"><h2 id="roadmapTitle"></h2><div id="roadmap"></div></div>
-        <div class="card soft"><h2 id="learningTitle"></h2><div id="learning"></div></div>
+        <div class="card soft"><h2 id="avoidTitle"></h2><div id="avoid" class="report-card-list"></div></div>
+        <div class="card soft"><h2 id="roadmapTitle"></h2><div id="roadmap" class="report-card-list"></div></div>
+        <div class="card soft"><h2 id="learningTitle"></h2><div id="learning" class="report-card-list"></div></div>
       </div>
     </div>
   </section>
@@ -122,32 +255,103 @@
 <script>
 const translations = {
   zh: {
-    startTest: "开始测试", clearRecord: "清空本地记录", backHome: "回到首页",
-    mbti: "人格类型（MBTI）", bigFive: "大五人格", riasec: "霍兰德职业兴趣", values: "职业价值观", skills: "能力自评",
-    Openness: "开放性", Conscientiousness: "尽责性", Extraversion: "外向性", Agreeableness: "宜人性", Neuroticism: "情绪敏感性",
-    Realistic: "实践型", Investigative: "研究型", Artistic: "艺术型", Social: "社会型", Enterprising: "企业型", Conventional: "常规型",
-    Wealth: "收入回报", Stability: "稳定保障", Freedom: "自由度", Achievement: "成就感", Influence: "影响力", SocialImpact: "社会价值", WorkLifeBalance: "工作生活平衡",
-    Leadership: "领导能力", Collaboration: "协作能力", DeepWork: "深度工作", Creativity: "创造能力", Execution: "执行能力", RiskTolerance: "风险承受能力",
-    logic: "逻辑", expression: "表达", execution: "执行", creativity: "创造", learning: "学习", cooperation: "协作"
+    startTest: "开始测试",
+    clearRecord: "清空本地记录",
+    backHome: "回到首页",
+    mbti: "人格类型（MBTI）",
+    bigFive: "大五人格",
+    riasec: "霍兰德职业兴趣",
+    values: "职业价值观",
+    skills: "能力自评",
+    Openness: "开放性",
+    Conscientiousness: "尽责性",
+    Extraversion: "外向性",
+    Agreeableness: "宜人性",
+    Neuroticism: "情绪敏感性",
+    Realistic: "实践型",
+    Investigative: "研究型",
+    Artistic: "艺术型",
+    Social: "社会型",
+    Enterprising: "企业型",
+    Conventional: "常规型",
+    Wealth: "收入回报",
+    Stability: "稳定保障",
+    Freedom: "自由度",
+    Achievement: "成就感",
+    Influence: "影响力",
+    SocialImpact: "社会价值",
+    WorkLifeBalance: "工作生活平衡",
+    Leadership: "领导能力",
+    Collaboration: "协作能力",
+    DeepWork: "深度工作",
+    Creativity: "创造能力",
+    Execution: "执行能力",
+    RiskTolerance: "风险承受能力",
+    logic: "逻辑",
+    expression: "表达",
+    execution: "执行",
+    creativity: "创造",
+    learning: "学习",
+    cooperation: "协作",
+    Organization: "组织",
+    Empathy: "共情",
+    StressTolerance: "抗压"
   },
   en: {
-    startTest: "Start Assessment", clearRecord: "Clear Local Records", backHome: "Back Home",
-    mbti: "MBTI", bigFive: "Big Five", riasec: "RIASEC", values: "Career Values", skills: "Skills",
-    Openness: "Openness", Conscientiousness: "Conscientiousness", Extraversion: "Extraversion", Agreeableness: "Agreeableness", Neuroticism: "Neuroticism",
-    Realistic: "Realistic", Investigative: "Investigative", Artistic: "Artistic", Social: "Social", Enterprising: "Enterprising", Conventional: "Conventional",
-    Wealth: "Wealth", Stability: "Stability", Freedom: "Freedom", Achievement: "Achievement", Influence: "Influence", SocialImpact: "Social Impact", WorkLifeBalance: "Work-Life Balance",
-    Leadership: "Leadership", Collaboration: "Collaboration", DeepWork: "Deep Work", Creativity: "Creativity", Execution: "Execution", RiskTolerance: "Risk Tolerance",
-    logic: "Logic", expression: "Expression", execution: "Execution", creativity: "Creativity", learning: "Learning", cooperation: "Cooperation"
+    startTest: "Start Assessment",
+    clearRecord: "Clear Local Records",
+    backHome: "Back Home",
+    mbti: "MBTI",
+    bigFive: "Big Five",
+    riasec: "RIASEC",
+    values: "Career Values",
+    skills: "Skills",
+    Openness: "Openness",
+    Conscientiousness: "Conscientiousness",
+    Extraversion: "Extraversion",
+    Agreeableness: "Agreeableness",
+    Neuroticism: "Neuroticism",
+    Realistic: "Realistic",
+    Investigative: "Investigative",
+    Artistic: "Artistic",
+    Social: "Social",
+    Enterprising: "Enterprising",
+    Conventional: "Conventional",
+    Wealth: "Wealth",
+    Stability: "Stability",
+    Freedom: "Freedom",
+    Achievement: "Achievement",
+    Influence: "Influence",
+    SocialImpact: "Social Impact",
+    WorkLifeBalance: "Work-Life Balance",
+    Leadership: "Leadership",
+    Collaboration: "Collaboration",
+    DeepWork: "Deep Work",
+    Creativity: "Creativity",
+    Execution: "Execution",
+    RiskTolerance: "Risk Tolerance",
+    logic: "Logic",
+    expression: "Expression",
+    execution: "Execution",
+    creativity: "Creativity",
+    learning: "Learning",
+    cooperation: "Cooperation",
+    Organization: "Organization",
+    Empathy: "Empathy",
+    StressTolerance: "Stress Tolerance"
   }
 };
-function t(key, language="zh"){ return translations[language]?.[key] || key; }
+
+function t(key, language = "zh") {
+  return translations[language]?.[key] || key;
+}
 
 const UI = {
   zh: {
     title: "职业规划与人生道路建议",
     hero: "结合人格、兴趣、价值观和能力自评，生成可执行的职业规划与成长建议。",
     assessment: "测评内容",
-    assessmentDesc: "四个模块覆盖人格、兴趣、价值观和能力。",
+    assessmentDesc: "四个模块覆盖人格类型、大五人格、职业兴趣、职业价值观和能力自评。",
     cards: [
       ["人格类型与大五人格（MBTI + Big Five）", "基础人格与工作风格。"],
       ["霍兰德职业兴趣（RIASEC）", "职业兴趣与适配方向。"],
@@ -156,18 +360,39 @@ const UI = {
     ],
     start: "开始测试",
     reset: "清空本地记录",
+    mbtiSelectTitle: "先选一个你自我感觉更接近的人格类型",
+    mbtiSelectDesc: "这一步只作为参考，不会单独决定结果。你也可以直接跳过。",
+    mbtiContinue: "继续测评",
+    mbtiSkip: "我不知道，直接开始",
     loading: "正在生成报告",
     loadingDesc: "正在把你的答案整理成职业规划建议。",
     reportTitle: "职业规划报告",
     consistency: "MBTI 一致性",
-    valuesSummary: "价值观摘要",
-    radar: "雷达图",
+    valuesSummary: "职业价值观摘要",
+    radar: "能力雷达图",
+    bigFiveTitle: "大五人格",
     careers: "推荐职业 Top 10",
     avoid: "不适合方向",
     roadmap: "未来 3 年成长路线",
     learning: "学习建议与提醒",
     goHome: "回到首页",
-    mbtiTag: (pred, self) => pred + (self && self !== "未知" ? " · " + self : "")
+    mbtiTag: (pred, self) => pred + (self && self !== "未知" ? " · " + self : ""),
+    surveyTitle: (stage) => stage === "basic" ? "基础人格问卷" : stage === "values" ? "职业价值观问卷" : stage === "skills" ? "能力自评问卷" : "追问问卷",
+    next: "下一题",
+    back: "返回",
+    nextStage: "进入下一阶段",
+    finish: "完成并生成报告",
+    valueStrong: "你最重视的职业价值观是：{value}。",
+    selfReportUnknown: "你没有填写自评 MBTI，因此以问卷推断的 {mbti} 为主。",
+    selfReportSame: "你的自评 MBTI {self} 与问卷推断的 {mbti} 基本一致。",
+    selfReportDiff: "你的自评 MBTI {self} 与问卷推断的 {mbti} 存在一定差异。",
+    overview: "你呈现出明显的 {mbti} 倾向，整体更接近 {riasec} 与 {workStyle} 的组合。",
+    sectionBadges: {
+      basic: "基础阶段",
+      values: "价值观阶段",
+      skills: "能力阶段",
+      adaptive: "自适应追问"
+    }
   },
   en: {
     title: "Career and Life Path Advice",
@@ -182,31 +407,54 @@ const UI = {
     ],
     start: "Start Test",
     reset: "Clear Local Records",
+    mbtiSelectTitle: "Pick the MBTI type you think fits you best",
+    mbtiSelectDesc: "This is only a reference and will not decide the result alone. You can skip it.",
+    mbtiContinue: "Continue",
+    mbtiSkip: "I don't know, skip",
     loading: "Generating Report",
     loadingDesc: "Turning your answers into career advice.",
     reportTitle: "Career Planning Report",
     consistency: "MBTI Consistency",
     valuesSummary: "Values Summary",
     radar: "Radar Chart",
+    bigFiveTitle: "Big Five",
     careers: "Top 10 Recommended Careers",
     avoid: "Less Suitable Paths",
     roadmap: "3-Year Growth Roadmap",
     learning: "Learning Suggestions & Notes",
     goHome: "Back Home",
-    mbtiTag: (pred, self) => pred + (self && self !== "Unknown" ? " · " + self : "")
+    mbtiTag: (pred, self) => pred + (self && self !== "Unknown" ? " · " + self : ""),
+    surveyTitle: (stage) => stage === "basic" ? "Basic Personality Questionnaire" : stage === "values" ? "Career Values Questionnaire" : stage === "skills" ? "Skill Self-Assessment" : "Adaptive Follow-up",
+    next: "Next",
+    back: "Back",
+    nextStage: "Next Stage",
+    finish: "Finish and Generate Report",
+    valueStrong: "Your strongest career value is: {value}.",
+    selfReportUnknown: "No self-reported MBTI was provided, so {mbti} is used as the main inference.",
+    selfReportSame: "Self-reported MBTI {self} and inferred MBTI {mbti} are generally aligned.",
+    selfReportDiff: "Self-reported MBTI {self} and inferred MBTI {mbti} are not fully aligned.",
+    overview: "You show a clear {mbti} tendency, with a profile closer to {riasec} + {workStyle}.",
+    sectionBadges: {
+      basic: "Basic",
+      values: "Values",
+      skills: "Skills",
+      adaptive: "Adaptive"
+    }
   }
 };
 
 const MBTI = ["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP","未知"];
 const OPTS_CN = ["非常不同意","不同意","一般","同意","非常同意"];
 const OPTS_EN = ["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"];
+const STORAGE_KEY = "ai-career-offline-mvp";
+
 const questions = [
   ["basic_e_1","basic","我更喜欢在多人场合主动开口，而不是一直等别人先说。","E","MBTI",false],
   ["basic_i_1","basic","长时间社交后，我通常更需要独处来恢复精力。","I","MBTI",false],
   ["basic_s_1","basic","我更信赖具体事实、经验和可验证的细节。","S","MBTI",false],
   ["basic_n_1","basic","我很容易被新点子、抽象概念和可能性吸引。","N","MBTI",false],
   ["basic_t_1","basic","做决策时，我更看重逻辑一致性而不是情绪感受。","T","MBTI",false],
-  ["basic_f_1","basic","在意见冲突中，我通常会先考虑别人感受。","F","MBTI",false],
+  ["basic_f_1","basic","在意见冲突中，我通常会先考虑别人的感受。","F","MBTI",false],
   ["basic_j_1","basic","我喜欢提前规划，并按计划推进任务。","J","MBTI",false],
   ["basic_p_1","basic","我更享受保留弹性、临场决定，而不是严格守计划。","P","MBTI",false],
   ["basic_open_1","basic","我乐于接触陌生领域、跨学科知识和不同观点。","Openness","BigFive",false],
@@ -218,70 +466,121 @@ const questions = [
   ["basic_agr_1","basic","我愿意从对方立场出发理解冲突，并寻找兼顾方案。","Agreeableness","BigFive",false],
   ["basic_agr_2","basic","即使分歧很大，我也倾向于维持合作关系。","Agreeableness","BigFive",false],
   ["basic_neu_1","basic","面对压力或不确定性时，我比较容易焦虑。","Neuroticism","BigFive",false],
-  ["basic_neu_2","basic","任务进展不顺时，我常会担心后果并反复想。","Neuroticism","BigFive",false],
+  ["basic_neu_2","basic","任务进展不顺时，我常常会反复担心后果。","Neuroticism","BigFive",false],
   ["basic_op_3","basic","我喜欢探索新想法，即使它们暂时还不成熟。","Openness","BigFive",false],
   ["basic_con_3","basic","我会主动把复杂任务拆解成清晰步骤。","Conscientiousness","BigFive",false],
-  ["adp_inv_1","adaptive","我会被需要分析、验证和找证据的问题长时间吸引。","Investigative","RIASEC",false],
-  ["adp_inv_2","adaptive","如果一件事有多个假设，我会愿意逐个排查。","Investigative","RIASEC",false],
+  ["adp_inv_1","adaptive","我会被需要分析、验证和找证据的问题长期吸引。","Investigative","RIASEC",false],
+  ["adp_inv_2","adaptive","如果一件事有多个假设，我愿意逐一排查。","Investigative","RIASEC",false],
   ["adp_art_1","adaptive","我会主动寻找表达创意、审美和原创性的空间。","Artistic","RIASEC",false],
-  ["adp_art_2","adaptive","面对空白题目或不明确任务，我更喜欢先试着做出独特方案。","Artistic","RIASEC",false],
-  ["adp_soc_1","adaptive","帮助别人理解、成长或解决困难，会让我获得很强的成就感。","Social","RIASEC",false],
+  ["adp_art_2","adaptive","面对空白题目或不明确任务，我更喜欢先想一个独特方案。","Artistic","RIASEC",false],
+  ["adp_soc_1","adaptive","帮助别人理解、成长或解决困难，会给我很强的成就感。","Social","RIASEC",false],
   ["adp_soc_2","adaptive","我能较自然地倾听他人并调整表达方式。","Social","RIASEC",false],
-  ["adp_ent_1","adaptive","我愿意为一个目标去说服别人、整合资源并推动结果。","Enterprising","RIASEC",false],
-  ["adp_ent_2","adaptive","在需要竞争、谈判或推动项目时，我会更有动力。","Enterprising","RIASEC",false],
-  ["adp_real_1","adaptive","我更喜欢能看得见结果、讲求实操的任务。","Realistic","RIASEC",false],
-  ["adp_real_2","adaptive","比起抽象讨论，我更愿意动手解决现实问题。","Realistic","RIASEC",false],
+  ["adp_ent_1","adaptive","我愿意为了一个目标去说服别人、整合资源并推动结果。","Enterprising","RIASEC",false],
+  ["adp_ent_2","adaptive","在竞争、谈判或推动项目时，我通常更有动力。","Enterprising","RIASEC",false],
+  ["adp_real_1","adaptive","我更喜欢能看见结果、讲求实操的任务。","Realistic","RIASEC",false],
+  ["adp_real_2","adaptive","比起抽象讨论，我更愿意动手解决实际问题。","Realistic","RIASEC",false],
   ["adp_con_1","adaptive","我倾向于喜欢规则清晰、流程明确的工作环境。","Conventional","RIASEC",false],
-  ["adp_con_2","adaptive","把事情整理成制度、表格、流程，我通常不排斥。","Conventional","RIASEC",false],
+  ["adp_con_2","adaptive","把事情整理成制度、表格或流程，会让我更安心。","Conventional","RIASEC",false],
   ["adp_lead_1","adaptive","我愿意承担带队、协调或拍板的角色。","Leadership","WorkStyle",false],
-  ["adp_lead_2","adaptive","当团队没人推动时，我通常会主动站出来。","Leadership","WorkStyle",false],
+  ["adp_lead_2","adaptive","当团队缺少推动力时，我通常会站出来。","Leadership","WorkStyle",false],
   ["adp_col_1","adaptive","我通常愿意配合他人节奏，把合作做成结果。","Collaboration","WorkStyle",false],
   ["adp_col_2","adaptive","我能在关系和目标之间找到平衡。","Collaboration","WorkStyle",false],
   ["adp_deep_1","adaptive","我可以长时间专注于一个复杂问题。","DeepWork","WorkStyle",false],
-  ["adp_deep_2","adaptive","即使没有即时反馈，我也能接受持续深入研究。","DeepWork","WorkStyle",false],
-  ["adp_cre_1","adaptive","我喜欢把一个普通任务做出新鲜感和创意。","Creativity","WorkStyle",false],
-  ["adp_cre_2","adaptive","我通常会尝试不同的思路，而不是只用固定套路。","Creativity","WorkStyle",false],
-  ["adp_exec_1","adaptive","我能稳定把任务推进到结束，而不只是开始得很快。","Execution","WorkStyle",false],
-  ["adp_exec_2","adaptive","在关键期限前，我会主动把进度拉回来。","Execution","WorkStyle",false],
+  ["adp_deep_2","adaptive","即使没有即时反馈，我也能持续深入研究。","DeepWork","WorkStyle",false],
+  ["adp_cre_1","adaptive","我喜欢把普通任务做出新鲜感和创意。","Creativity","WorkStyle",false],
+  ["adp_cre_2","adaptive","我常常会尝试不同思路，而不是只用固定套路。","Creativity","WorkStyle",false],
+  ["adp_exec_1","adaptive","我能稳定把任务推进到完成，而不只是开始得快。","Execution","WorkStyle",false],
+  ["adp_exec_2","adaptive","在关键期限前，我会主动拉回进度。","Execution","WorkStyle",false],
   ["adp_risk_1","adaptive","我更偏好稳定、可预期的工作环境。","RiskTolerance","WorkStyle",true],
   ["adp_risk_2","adaptive","面对不确定结果，我通常会先评估最坏情况。","RiskTolerance","WorkStyle",true],
-  ["adp_extra_1","adaptive","我喜欢讨论未来趋势、行业变化和长线策略。","Enterprising","RIASEC",false],
-  ["adp_extra_2","adaptive","我对系统、架构和技术细节有持续兴趣。","Investigative","RIASEC",false],
-  ["adp_extra_3","adaptive","我愿意在高压力环境下仍然保持输出。","Execution","WorkStyle",false],
+  ["adp_extra_1","adaptive","我喜欢讨论行业趋势、商业模式和长期策略。","Enterprising","RIASEC",false],
+  ["adp_extra_2","adaptive","我对系统结构、技术细节和逻辑关系会持续保持兴趣。","Investigative","RIASEC",false],
+  ["adp_extra_3","adaptive","我愿意在高压力环境下维持稳定输出。","Execution","WorkStyle",false],
   ["adp_extra_4","adaptive","我倾向于把复杂局面拆成可执行的结构。","Conventional","RIASEC",false],
   ["val_wealth_1","values","收入水平对我选择职业非常重要。","Wealth","CareerValues",false],
   ["val_stab_1","values","我很看重职业稳定性和长期可预期性。","Stability","CareerValues",false],
   ["val_free_1","values","我更喜欢拥有较多自主权和工作弹性。","Freedom","CareerValues",false],
-  ["val_ach_1","values","我对持续取得可见成果和成就感非常敏感。","Achievement","CareerValues",false],
+  ["val_ach_1","values","我对持续取得可见成果和成就感很敏感。","Achievement","CareerValues",false],
   ["val_inf_1","values","影响他人、推动决策对我有吸引力。","Influence","CareerValues",false],
   ["val_soc_1","values","我希望自己的工作能对社会产生正向影响。","SocialImpact","CareerValues",false],
-  ["val_wlb_1","values","工作和生活平衡对我来说是重要前提。","WorkLifeBalance","CareerValues",false],
-  ["val_wealth_2","values","如果职业能显著提升收入，我会更愿意投入。","Wealth","CareerValues",false],
-  ["val_stab_2","values","我愿意为更高稳定性接受较慢的上升速度。","Stability","CareerValues",false],
+  ["val_wlb_1","values","工作和生活平衡对我来说很重要。","WorkLifeBalance","CareerValues",false],
+  ["val_wealth_2","values","如果职业能明显提升收入，我会更愿意投入。","Wealth","CareerValues",false],
+  ["val_stab_2","values","我愿意为了更高稳定性接受较慢的上升速度。","Stability","CareerValues",false],
   ["val_free_2","values","我不太能接受高度受控、缺乏自主安排的工作。","Freedom","CareerValues",false],
-  ["skill_log_1","skills","我擅长把复杂问题拆解成逻辑步骤。","Logic","Skills",false],
+  ["skill_log_1","skills","我擅长把复杂问题拆解成清晰的逻辑步骤。","Logic","Skills",false],
   ["skill_exp_1","skills","我能够清晰表达观点，让别人快速理解。","Expression","Skills",false],
-  ["skill_exe_1","skills","我能稳定把事情做完，且注意细节。","Execution","Skills",false],
+  ["skill_exe_1","skills","我能稳定把事情做完，并注意细节。","Execution","Skills",false],
   ["skill_cre_1","skills","我经常主动提出新的做法或想法。","Creativity","Skills",false],
   ["skill_learn_1","skills","我学习新知识的速度通常比较快。","Learning","Skills",false],
   ["skill_org_1","skills","我擅长组织信息、安排时间和推进节奏。","Organization","Skills",false],
   ["skill_emp_1","skills","我能较好理解别人的情绪和真实需求。","Empathy","Skills",false],
-  ["skill_stress_1","skills","即使任务压力变大，我也通常能维持基本稳定。","StressTolerance","Skills",false],
+  ["skill_stress_1","skills","即使压力变大，我也能保持基本稳定。","StressTolerance","Skills",false],
   ["skill_lead_1","skills","我愿意在需要时组织人手并协调分工。","Leadership","Skills",false],
   ["skill_coll_1","skills","我能在协作中兼顾倾听与推进。","Collaboration","Skills",false]
 ];
 
-let state = loadState(), answers = state.answers || {}, mbtiSelf = state.mbtiSelf || "未知", adaptiveTake = [], currentSet = [], currentStage = "", index = 0, lang = state.lang || "zh";
+let state = loadState();
+let answers = state.answers || {};
+let mbtiSelf = state.mbtiSelf || "未知";
+let adaptiveTake = [];
+let currentSet = [];
+let currentStage = "";
+let index = 0;
+let lang = state.lang || "zh";
+let mbtiChosen = mbtiSelf !== "未知";
 
-function loadState(){ try { return JSON.parse(localStorage.getItem("ai-career-offline-mvp") || "{}"); } catch(e){ return {}; } }
-function saveState(){ localStorage.setItem("ai-career-offline-mvp", JSON.stringify({ mbtiSelf, answers, report: state.report || null, lang })); }
-function resetAll(){ localStorage.removeItem("ai-career-offline-mvp"); location.reload(); }
-function hideAll(){ ["surveyShell","loading","report"].forEach(id => document.getElementById(id).classList.add("hidden")); }
-function goHome(){ hideAll(); document.querySelector(".wide-title").scrollIntoView({behavior:"smooth", block:"start"}); }
-function toggleLang(){ lang = lang === "zh" ? "en" : "zh"; saveState(); applyLanguage(); if(state.report) renderReport(state.report); }
-function getText(key){ return translations[lang]?.[key] || key; }
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
 
-function applyLanguage(){
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    mbtiSelf,
+    answers,
+    report: state.report || null,
+    lang
+  }));
+}
+
+function resetAll() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+function hideAll() {
+  ["surveyShell", "loading", "report"].forEach(id => document.getElementById(id).classList.add("hidden"));
+}
+
+function goHome() {
+  hideAll();
+  document.getElementById("mbtiShell").classList.add("hidden");
+  document.querySelector(".wide-title").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function toggleLang() {
+  lang = lang === "zh" ? "en" : "zh";
+  saveState();
+  applyLanguage();
+  if (state.report) renderReport(state.report);
+}
+
+function getText(key) {
+  return translations[lang]?.[key] || key;
+}
+
+function fillTemplate(template, vars) {
+  return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+}
+
+function isUnknownMbti(value) {
+  return !value || value === "未知" || value === "Unknown";
+}
+
+function applyLanguage() {
   document.title = UI[lang].title;
   document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
   document.getElementById("mainTitle").textContent = UI[lang].title;
@@ -298,48 +597,92 @@ function applyLanguage(){
   document.getElementById("card4Desc").textContent = UI[lang].cards[3][1];
   document.getElementById("startBtn").textContent = UI[lang].start;
   document.getElementById("resetBtn").textContent = UI[lang].reset;
+  const mbtiTitle = document.getElementById("mbtiSelectTitle");
+  const mbtiDesc = document.getElementById("mbtiSelectDesc");
+  const mbtiContinueBtn = document.getElementById("mbtiContinueBtn");
+  const mbtiSkipBtn = document.getElementById("mbtiSkipBtn");
+  if (mbtiTitle) mbtiTitle.textContent = UI[lang].mbtiSelectTitle;
+  if (mbtiDesc) mbtiDesc.textContent = UI[lang].mbtiSelectDesc;
+  if (mbtiContinueBtn) mbtiContinueBtn.textContent = UI[lang].mbtiContinue;
+  if (mbtiSkipBtn) mbtiSkipBtn.textContent = UI[lang].mbtiSkip;
   document.getElementById("loadingTitle").textContent = UI[lang].loading;
   document.getElementById("loadingDesc").textContent = UI[lang].loadingDesc;
   document.getElementById("reportTitle").textContent = UI[lang].reportTitle;
   document.getElementById("consistencyTitle").textContent = UI[lang].consistency;
   document.getElementById("valuesSummaryTitle").textContent = UI[lang].valuesSummary;
   document.getElementById("radarTitle").textContent = UI[lang].radar;
+  document.getElementById("bigFiveTitle").textContent = UI[lang].bigFiveTitle;
   document.getElementById("careerTitle").textContent = UI[lang].careers;
   document.getElementById("avoidTitle").textContent = UI[lang].avoid;
   document.getElementById("roadmapTitle").textContent = UI[lang].roadmap;
   document.getElementById("learningTitle").textContent = UI[lang].learning;
   document.getElementById("goHomeBtn").textContent = UI[lang].goHome;
+  document.getElementById("langBtn").textContent = "中文 / English";
+  if (currentSet.length) renderQuestion();
 }
 
-function initMBTI(){
+function initMBTI() {
   const box = document.getElementById("mbtiGrid");
-  if(!box) return;
+  if (!box) return;
   box.innerHTML = "";
   MBTI.forEach(v => {
     const b = document.createElement("button");
+    b.type = "button";
     b.className = "choice" + (mbtiSelf === v ? " active" : "");
-    b.textContent = v;
-    b.onclick = () => { mbtiSelf = v; saveState(); initMBTI(); };
+    b.textContent = v === "未知" ? (lang === "zh" ? "不知道" : "Unknown") : v;
+    b.onclick = () => {
+      mbtiSelf = v;
+      mbtiChosen = v !== "未知";
+      saveState();
+      initMBTI();
+    };
     box.appendChild(b);
   });
 }
 
-function weightedScores(qs){
+function renderQuestion() {
+  const q = currentSet[index];
+  document.getElementById("stageName").textContent = UI[lang].sectionBadges[currentStage] || currentStage;
+  document.getElementById("surveyTitle").textContent = UI[lang].surveyTitle(currentStage);
+  document.getElementById("progressText").textContent = `${index + 1} / ${currentSet.length}`;
+  document.getElementById("progressBar").style.width = `${Math.round((index / currentSet.length) * 100)}%`;
+  document.getElementById("questionText").textContent = q[2];
+  const opt = document.getElementById("options");
+  opt.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "choice" + (answers[q[0]] === i ? " active" : "");
+    b.textContent = lang === "zh" ? OPTS_CN[i - 1] : OPTS_EN[i - 1];
+    b.onclick = () => {
+      answers[q[0]] = i;
+      saveState();
+      renderQuestion();
+    };
+    opt.appendChild(b);
+  }
+  document.getElementById("nextBtn").textContent = index === currentSet.length - 1 ? (currentStage === "skills" ? UI[lang].finish : UI[lang].nextStage) : UI[lang].next;
+  document.getElementById("nextBtn").disabled = answers[q[0]] == null;
+  document.getElementById("prevBtn").textContent = UI[lang].back;
+  document.getElementById("prevBtn").disabled = index === 0;
+}
+
+function weightedScores(qs) {
   const by = {};
   qs.forEach(q => {
     const v = answers[q[0]];
-    if(v == null) return;
+    if (v == null) return;
     const real = q[5] ? 6 - v : v;
     (by[q[3]] ||= []).push(real);
   });
   return dim => {
     const arr = by[dim] || [];
-    if(!arr.length) return 0;
-    return Math.round(((arr.reduce((a,b)=>a+b,0) / arr.length) - 1) / 4 * 100);
+    if (!arr.length) return 0;
+    return Math.round(((arr.reduce((a, b) => a + b, 0) / arr.length) - 1) / 4 * 100);
   };
 }
 
-function scoreBasic(){
+function scoreBasic() {
   const avg = weightedScores(questions.filter(q => q[1] === "basic"));
   return {
     mbti: { E: avg("E"), I: avg("I"), S: avg("S"), N: avg("N"), T: avg("T"), F: avg("F"), J: avg("J"), P: avg("P") },
@@ -347,172 +690,738 @@ function scoreBasic(){
   };
 }
 
-function pickAdaptive(scores){
+function pickAdaptive(scores) {
   const out = new Map();
   const add = dim => questions.filter(q => q[1] === "adaptive" && q[3] === dim).forEach(q => out.set(q[0], q));
-  add("Investigative"); add("Artistic"); add("DeepWork"); add("Creativity");
-  if(scores.bigFive.Openness > 70) ["Investigative","Artistic","DeepWork"].forEach(add);
-  if(scores.bigFive.Extraversion > 70) ["Enterprising","Social","Leadership"].forEach(add);
-  if(scores.bigFive.Conscientiousness > 70) ["Execution","Conventional"].forEach(add);
-  if(scores.bigFive.Neuroticism > 65) add("RiskTolerance");
-  if(scores.bigFive.Extraversion > 65) ["Enterprising","Leadership"].forEach(add);
-  if(scores.bigFive.Openness > 65) ["Investigative","DeepWork"].forEach(add);
-  ["Investigative","Artistic","Social","Enterprising","Realistic","Conventional","Leadership","Collaboration","DeepWork","Creativity","Execution","RiskTolerance"].forEach(dim => {
-    if(out.size < 24) questions.filter(q => q[1] === "adaptive" && q[3] === dim).forEach(q => out.set(q[0], q));
+  if (scores.bigFive.Openness > 70) ["Investigative", "Artistic", "DeepWork"].forEach(add);
+  if (scores.bigFive.Extraversion > 70) ["Enterprising", "Social", "Leadership"].forEach(add);
+  if (scores.bigFive.Conscientiousness > 70) ["Execution", "Conventional"].forEach(add);
+  if (scores.bigFive.Neuroticism > 65) add("RiskTolerance");
+  if (scores.bigFive.Extraversion > 65) ["Enterprising", "Leadership"].forEach(add);
+  if (scores.bigFive.Openness > 65) ["Investigative", "DeepWork"].forEach(add);
+  ["Investigative", "Artistic", "Social", "Enterprising", "Realistic", "Conventional", "Leadership", "Collaboration", "DeepWork", "Creativity", "Execution", "RiskTolerance"].forEach(dim => {
+    if (out.size < 24) questions.filter(q => q[1] === "adaptive" && q[3] === dim).forEach(q => out.set(q[0], q));
   });
-  return [...out.values()].slice(0,24);
+  return [...out.values()].slice(0, 24);
 }
 
-function startSurvey(){
-  state = loadState(); answers = state.answers || {};
-  adaptiveTake = pickAdaptive(scoreBasic());
+function startSurvey() {
+  document.getElementById("mbtiShell").classList.remove("hidden");
+  document.getElementById("surveyShell").classList.add("hidden");
+  document.getElementById("loading").classList.add("hidden");
+  document.getElementById("report").classList.add("hidden");
+  document.getElementById("mbtiShell").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function confirmMBTI() {
+  mbtiChosen = true;
+  state = loadState();
+  answers = state.answers || {};
+  adaptiveTake = [];
   currentSet = questions.filter(q => q[1] === "basic");
   currentStage = "basic";
   index = 0;
+  document.getElementById("mbtiShell").classList.add("hidden");
   document.getElementById("surveyShell").classList.remove("hidden");
-  document.getElementById("surveyShell").scrollIntoView({behavior:"smooth", block:"start"});
+  document.getElementById("loading").classList.add("hidden");
+  document.getElementById("report").classList.add("hidden");
+  document.getElementById("surveyShell").scrollIntoView({ behavior: "smooth", block: "start" });
   renderQuestion();
 }
 
-function renderQuestion(){
-  const q = currentSet[index];
-  document.getElementById("stageName").textContent = currentStage;
-  document.getElementById("surveyTitle").textContent = currentStage === "basic" ? (lang === "zh" ? "基础人格问卷" : "Personality Questionnaire") : currentStage === "values" ? (lang === "zh" ? "职业价值观" : "Career Values") : (lang === "zh" ? "能力自评" : "Skill Self-Assessment");
-  document.getElementById("progressText").textContent = `${index+1} / ${currentSet.length}`;
-  document.getElementById("progressBar").style.width = `${Math.round((index/currentSet.length)*100)}%`;
-  document.getElementById("questionText").textContent = q[2];
-  const opt = document.getElementById("options");
-  opt.innerHTML = "";
-  for(let i=1;i<=5;i++){
-    const b = document.createElement("button");
-    b.className = "choice" + (answers[q[0]] === i ? " active" : "");
-    b.textContent = lang === "zh" ? OPTS_CN[i-1] : OPTS_EN[i-1];
-    b.onclick = () => { answers[q[0]] = i; saveState(); renderQuestion(); };
-    opt.appendChild(b);
+function skipMBTI() {
+  mbtiSelf = "未知";
+  mbtiChosen = false;
+  saveState();
+  confirmMBTI();
+}
+
+function prevQ() {
+  if (index > 0) {
+    index--;
+    renderQuestion();
   }
-  document.getElementById("nextBtn").textContent = index === currentSet.length - 1 ? (currentStage === "skills" ? (lang === "zh" ? "完成并生成报告" : "Finish and Generate Report") : (lang === "zh" ? "下一阶段" : "Next Stage")) : (lang === "zh" ? "下一题" : "Next");
-  document.getElementById("nextBtn").disabled = answers[q[0]] == null;
-  const backBtn = document.querySelector("#surveyShell .btn.secondary");
-  backBtn.textContent = lang === "zh" ? "返回" : "Back";
-  backBtn.disabled = index === 0;
 }
 
-function prevQ(){ if(index > 0){ index--; renderQuestion(); } }
-function nextQ(){
+function nextQ() {
   const q = currentSet[index];
-  if(answers[q[0]] == null) return;
-  if(index < currentSet.length - 1){ index++; renderQuestion(); return; }
-  if(currentStage === "basic"){ currentSet = questions.filter(q => q[1] === "values"); currentStage = "values"; index = 0; renderQuestion(); return; }
-  if(currentStage === "values"){ currentSet = questions.filter(q => q[1] === "skills"); currentStage = "skills"; index = 0; renderQuestion(); return; }
-  if(currentStage === "skills"){ finish(); return; }
+  if (answers[q[0]] == null) return;
+  if (index < currentSet.length - 1) {
+    index++;
+    renderQuestion();
+    return;
+  }
+  if (currentStage === "basic") {
+    adaptiveTake = pickAdaptive(scoreBasic());
+    currentSet = adaptiveTake.length ? adaptiveTake : questions.filter(q => q[1] === "adaptive").slice(0, 24);
+    currentStage = "adaptive";
+    index = 0;
+    renderQuestion();
+    return;
+  }
+  if (currentStage === "adaptive") {
+    currentSet = questions.filter(q => q[1] === "values");
+    currentStage = "values";
+    index = 0;
+    renderQuestion();
+    return;
+  }
+  if (currentStage === "values") {
+    currentSet = questions.filter(q => q[1] === "skills");
+    currentStage = "skills";
+    index = 0;
+    renderQuestion();
+    return;
+  }
+  if (currentStage === "skills") {
+    finish();
+  }
 }
 
-function avgScore(qs, dim){
+function avgScore(qs, dim) {
   const arr = qs.filter(q => q[3] === dim && answers[q[0]] != null).map(q => q[5] ? 6 - answers[q[0]] : answers[q[0]]);
-  if(!arr.length) return 0;
-  return Math.round(((arr.reduce((a,b)=>a+b,0)/arr.length)-1)/4*100);
+  if (!arr.length) return 0;
+  return Math.round(((arr.reduce((a, b) => a + b, 0) / arr.length) - 1) / 4 * 100);
 }
 
-function inferMBTI(scores){
+function inferMBTI(scores) {
   return (scores.E >= scores.I ? "E" : "I") + (scores.S >= scores.N ? "S" : "N") + (scores.T >= scores.F ? "T" : "F") + (scores.J >= scores.P ? "J" : "P");
 }
 
-function topKey(obj){ return Object.entries(obj).sort((a,b)=>b[1]-a[1])[0][0]; }
-
-function finish(){
-  document.getElementById("loading").classList.remove("hidden");
-  document.getElementById("loading").scrollIntoView({behavior:"smooth", block:"start"});
-  setTimeout(() => {
-    const basicQs = questions.filter(q => q[1] === "basic");
-    const adaptiveQs = adaptiveTake;
-    const valuesQs = questions.filter(q => q[1] === "values");
-    const skillsQs = questions.filter(q => q[1] === "skills");
-    const scores = {
-      mbti: { E: avgScore(basicQs,"E"), I: avgScore(basicQs,"I"), S: avgScore(basicQs,"S"), N: avgScore(basicQs,"N"), T: avgScore(basicQs,"T"), F: avgScore(basicQs,"F"), J: avgScore(basicQs,"J"), P: avgScore(basicQs,"P") },
-      bigFive: { Openness: avgScore(basicQs,"Openness"), Conscientiousness: avgScore(basicQs,"Conscientiousness"), Extraversion: avgScore(basicQs,"Extraversion"), Agreeableness: avgScore(basicQs,"Agreeableness"), Neuroticism: avgScore(basicQs,"Neuroticism") },
-      riasec: { Realistic: avgScore(adaptiveQs,"Realistic"), Investigative: avgScore(adaptiveQs,"Investigative"), Artistic: avgScore(adaptiveQs,"Artistic"), Social: avgScore(adaptiveQs,"Social"), Enterprising: avgScore(adaptiveQs,"Enterprising"), Conventional: avgScore(adaptiveQs,"Conventional") },
-      values: { Wealth: avgScore(valuesQs,"Wealth"), Stability: avgScore(valuesQs,"Stability"), Freedom: avgScore(valuesQs,"Freedom"), Achievement: avgScore(valuesQs,"Achievement"), Influence: avgScore(valuesQs,"Influence"), SocialImpact: avgScore(valuesQs,"SocialImpact"), WorkLifeBalance: avgScore(valuesQs,"WorkLifeBalance") },
-      workStyle: { Leadership: avgScore(adaptiveQs,"Leadership"), Collaboration: avgScore(adaptiveQs,"Collaboration"), DeepWork: avgScore(adaptiveQs,"DeepWork"), Creativity: avgScore(adaptiveQs,"Creativity"), Execution: avgScore(adaptiveQs,"Execution"), RiskTolerance: avgScore(adaptiveQs,"RiskTolerance") },
-      skills: { Logic: avgScore(skillsQs,"Logic"), Expression: avgScore(skillsQs,"Expression"), Execution: avgScore(skillsQs,"Execution"), Creativity: avgScore(skillsQs,"Creativity"), Learning: avgScore(skillsQs,"Learning"), Organization: avgScore(skillsQs,"Organization"), Empathy: avgScore(skillsQs,"Empathy"), StressTolerance: avgScore(skillsQs,"StressTolerance"), Leadership: avgScore(skillsQs,"Leadership"), Collaboration: avgScore(skillsQs,"Collaboration") }
-    };
-    const mbtiPred = inferMBTI(scores.mbti);
-    const report = {
-      createdAt: new Date().toISOString(),
-      mbtiSelf,
-      mbtiPredicted: mbtiPred,
-      scores,
-      overview: lang === "zh" ? `你是一个 ${mbtiPred} 倾向明显的人，整体更接近 “${getText(topKey(scores.riasec))} + ${getText(topKey(scores.workStyle))}” 的组合。` : `You show a clear ${mbtiPred} tendency, with a profile closer to "${getText(topKey(scores.riasec))} + ${getText(topKey(scores.workStyle))}".`,
-      consistency: mbtiSelf && mbtiSelf !== (lang === "zh" ? "未知" : "Unknown")
-        ? (lang === "zh" ? `自填 MBTI ${mbtiSelf} 与问卷推断 ${mbtiPred} ${mbtiSelf===mbtiPred ? "基本一致" : "存在差异"}。` : `Self-reported MBTI ${mbtiSelf} and inferred MBTI ${mbtiPred} are ${mbtiSelf===mbtiPred ? "generally aligned" : "not fully aligned"}.`)
-        : (lang === "zh" ? `你未提供自填 MBTI，因此以问卷推断 ${mbtiPred} 为主。` : `No self-reported MBTI was provided, so ${mbtiPred} is used as the main inference.`),
-      valuesSummary: lang === "zh" ? `你最重视的职业价值观是：${getText(topKey(scores.values))}。` : `Your strongest career value is ${topKey(scores.values)}.`,
-      recommended: [
-        ["产品经理","适合综合型画像，吃重逻辑、协作、表达和推动结果。"],
-        ["数据分析师","适合高逻辑、高深度工作倾向，能把分析转成行动建议。"],
-        ["研究员/研究助理","适合高开放性与研究型倾向。"],
-        ["策略/商业分析","需要抽象思考、结构化判断与沟通。"],
-        ["内容策划/品牌策略","适合创意与表达同时在线的人。"],
-        ["咨询顾问","适合高表达、高影响力、高适应性。"],
-        ["运营管理","适合执行、组织和协作能力较强的人。"],
-        ["项目经理","需要统筹、推进与风险控制。"],
-        ["教育培训/职业教练","适合共情、表达和帮助他人成长。"],
-        ["技术产品/AI应用设计","适合技术理解、产品抽象和跨学科协作。"]
-      ],
-      avoid: ["极度重复、低自主、低反馈的流水线岗位","长期高冲突、强压迫式管理环境","与核心价值观明显冲突、难以体现个人意义的岗位"],
-      roadmap: ["第1年：确认核心优势，补齐最薄弱的 1-2 项硬技能，完成 2-3 个可展示项目。","第2年：在目标方向上形成作品集、案例库或业务成果，争取一次跨角色成长。","第3年：向更高杠杆岗位迁移，强化影响力、方法论与个人品牌。"],
-      learning: ["先学通用底层：逻辑表达、数据分析、项目协作、AI 工具使用。","再按职业方向分流：研究型强化统计与写作，商业型强化用户/市场/财务，产品型强化需求分析和方案设计。","每 6-8 周复盘一次职业匹配度，及时修正路径。"],
-      risks: ["MBTI 只作为自填参考，不是唯一结论。","如果神经质偏高或风险规避强，不要过早进入极高不确定赛道。","如果价值观中稳定与自由同时很高，优先选择弹性大但边界清晰的岗位。"]
-    };
-    state.report = report;
-    saveState();
-    renderReport(report);
-    document.getElementById("loading").classList.add("hidden");
-    document.getElementById("report").classList.remove("hidden");
-    document.getElementById("report").scrollIntoView({behavior:"smooth", block:"start"});
-  }, 650);
+function topKey(obj) {
+  return Object.entries(obj).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-function renderReport(r){
-  document.getElementById("mbtiTag").textContent = UI[lang].mbtiTag(r.mbtiPredicted, r.mbtiSelf);
-  document.getElementById("overview").textContent = r.overview;
-  document.getElementById("consistency").textContent = r.consistency;
-  document.getElementById("valuesSummary").textContent = r.valuesSummary;
-  document.getElementById("bigFive").innerHTML = Object.entries(r.scores.bigFive).map(([k,v]) => `<div class="metric"><div class="row"><span>${getText(k)}</span><span>${v}</span></div><div class="bar"><div style="width:${v}%"></div></div></div>`).join("");
-  document.getElementById("careers").innerHTML = r.recommended.map(([a,b]) => `<div class="card" style="background:#fff;margin-bottom:10px"><strong>${a}</strong><p>${b}</p></div>`).join("");
-  document.getElementById("avoid").innerHTML = r.avoid.map(x => `<div class="card" style="background:#fff;margin-bottom:10px">${x}</div>`).join("");
-  document.getElementById("roadmap").innerHTML = r.roadmap.map(x => `<div class="card" style="background:#fff;margin-bottom:10px">${x}</div>`).join("");
-  document.getElementById("learning").innerHTML = [...r.learning, ...r.risks].map(x => `<div class="card" style="background:#fff;margin-bottom:10px">${x}</div>`).join("");
-  drawRadar(document.getElementById("radar"), [r.scores.skills.Logic,r.scores.skills.Expression,r.scores.skills.Execution,r.scores.skills.Creativity,r.scores.skills.Learning,r.scores.skills.Collaboration], lang === "zh" ? [getText("logic"), getText("expression"), getText("execution"), getText("creativity"), getText("learning"), getText("cooperation")] : ["Logic","Expression","Execution","Creativity","Learning","Cooperation"]);
+function localizedReportText(r) {
+  const scores = r.scores;
+  const mbtiPred = r.mbtiPredicted;
+  const self = r.mbtiSelf;
+  const overview = fillTemplate(UI[lang].overview, {
+    mbti: mbtiPred,
+    riasec: getText(topKey(scores.riasec)),
+    workStyle: getText(topKey(scores.workStyle))
+  });
+  const consistency = !isUnknownMbti(self)
+    ? fillTemplate(self === mbtiPred ? UI[lang].selfReportSame : UI[lang].selfReportDiff, { self, mbti: mbtiPred })
+    : fillTemplate(UI[lang].selfReportUnknown, { mbti: mbtiPred });
+  const valuesSummary = fillTemplate(UI[lang].valueStrong, { value: getText(topKey(scores.values)) });
+  return { overview, consistency, valuesSummary };
 }
 
-function drawRadar(canvas, values, labels){
-  const ctx = canvas.getContext("2d"), w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, base = 110;
-  ctx.clearRect(0,0,w,h);
+function reportContent() {
+  return {
+    recommended: [
+      [lang === "zh" ? "产品经理" : "Product Manager", lang === "zh" ? "适合综合型画像，兼顾逻辑、协作、表达和推动结果。" : "Good for a balanced profile that combines logic, collaboration, communication, and delivery."],
+      [lang === "zh" ? "数据分析师" : "Data Analyst", lang === "zh" ? "适合高逻辑、高专注倾向，能把分析转成行动建议。" : "Fits strong logic and focus, with the ability to turn analysis into action."],
+      [lang === "zh" ? "研究员 / 研究助理" : "Researcher / Research Assistant", lang === "zh" ? "适合高开放性与研究型倾向。" : "Fits high openness and investigative tendencies."],
+      [lang === "zh" ? "策略 / 商业分析" : "Strategy / Business Analyst", lang === "zh" ? "需要抽象思考、结构化判断与沟通。" : "Requires abstract thinking, structured judgment, and communication."],
+      [lang === "zh" ? "内容策划 / 品牌策略" : "Content Planner / Brand Strategist", lang === "zh" ? "适合创意与表达同时在线的人。" : "Fits people who are creative and expressive."],
+      [lang === "zh" ? "咨询顾问" : "Consultant", lang === "zh" ? "适合表达、影响力与适应性较强的人。" : "Fits strong communication, influence, and adaptability."],
+      [lang === "zh" ? "运营管理" : "Operations Manager", lang === "zh" ? "适合执行、组织和协作能力较强的人。" : "Fits strong execution, organization, and collaboration."],
+      [lang === "zh" ? "项目经理" : "Project Manager", lang === "zh" ? "需要统筹、推进与风险控制。" : "Needs coordination, progress management, and risk control."],
+      [lang === "zh" ? "教育培训 / 职业教练" : "Education & Coaching", lang === "zh" ? "适合共情、表达和帮助他人成长。" : "Fits empathy, expression, and helping others grow."],
+      [lang === "zh" ? "技术产品 / AI 应用设计" : "Technical Product / AI Design", lang === "zh" ? "适合技术理解、产品抽象和跨学科协作。" : "Fits technical understanding, product abstraction, and cross-functional collaboration."]
+    ],
+    avoid: [
+      lang === "zh" ? "极度重复、低自主、低反馈的流水线岗位" : "Highly repetitive, low-autonomy, low-feedback roles",
+      lang === "zh" ? "长期高冲突、强压迫式管理环境" : "Long-term high-conflict, pressure-heavy management environments",
+      lang === "zh" ? "与核心价值观明显冲突、难以体现个人意义的岗位" : "Roles that strongly conflict with core values and lack personal meaning"
+    ],
+    roadmap: [
+      lang === "zh" ? "第 1 年：确认核心优势，补齐最薄弱的 1-2 项硬技能，完成 2-3 个可展示项目。" : "Year 1: Confirm core strengths, shore up 1-2 weakest hard skills, and finish 2-3 showcase projects.",
+      lang === "zh" ? "第 2 年：在目标方向形成作品集、案例库或业务成果，争取一次跨角色成长。" : "Year 2: Build a portfolio, case library, or business outcomes in the target direction, and seek cross-role growth.",
+      lang === "zh" ? "第 3 年：向更高杠杆岗位迁移，强化影响力、方法论与个人品牌。" : "Year 3: Move toward higher-leverage roles and strengthen influence, methodology, and personal brand."
+    ],
+    learning: [
+      lang === "zh" ? "先学通用底层：逻辑表达、数据分析、项目协作、AI 工具使用。" : "Start with fundamentals: logical expression, data analysis, project collaboration, and AI tool use.",
+      lang === "zh" ? "再按职业方向强化：研究型补统计与写作，商业型补市场与财务，产品型补需求分析与方案设计。" : "Then deepen by direction: research roles strengthen stats and writing; business roles strengthen marketing and finance; product roles strengthen requirements analysis and solution design.",
+      lang === "zh" ? "每 6-8 周复盘一次职业匹配度，及时微调方向。" : "Review career fit every 6-8 weeks and adjust direction in time."
+    ],
+    risks: [
+      lang === "zh" ? "MBTI 只作自填参考，不是唯一结论。" : "MBTI is only a self-report reference, not the final conclusion.",
+      lang === "zh" ? "如果情绪波动较大，先选择节奏稳定的环境，再考虑高不确定性赛道。" : "If emotional volatility is high, prioritize stable environments before high-uncertainty tracks.",
+      lang === "zh" ? "当稳定和自由都很重要时，优先选边界清晰但有弹性的岗位。" : "When both stability and freedom matter, choose roles with clear boundaries and flexibility."
+    ]
+  };
+}
+
+function drawRadar(canvas, values, labels) {
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, base = Math.min(w, h) * 0.34;
+  ctx.clearRect(0, 0, w, h);
   ctx.strokeStyle = "rgba(93,132,200,.25)";
-  for(let layer=1; layer<=3; layer++){
+  for (let layer = 1; layer <= 3; layer++) {
     ctx.beginPath();
-    for(let i=0;i<labels.length;i++){
-      const a = -Math.PI/2 + i*Math.PI*2/labels.length, r = base*layer/3, x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    for (let i = 0; i < labels.length; i++) {
+      const a = -Math.PI / 2 + i * Math.PI * 2 / labels.length, r = base * layer / 3, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
-    ctx.closePath(); ctx.stroke();
+    ctx.closePath();
+    ctx.stroke();
   }
   ctx.beginPath();
-  values.forEach((v,i)=>{ const a = -Math.PI/2 + i*Math.PI*2/values.length, r = base*(v/100), x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r; i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y); });
+  values.forEach((v, i) => {
+    const a = -Math.PI / 2 + i * Math.PI * 2 / values.length, r = base * (v / 100), x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
   ctx.closePath();
   ctx.fillStyle = "rgba(93,132,200,.18)";
   ctx.strokeStyle = "#5d84c8";
   ctx.lineWidth = 2;
-  ctx.fill(); ctx.stroke();
+  ctx.fill();
+  ctx.stroke();
   ctx.fillStyle = "#334155";
   ctx.font = "12px system-ui";
-  labels.forEach((label,i)=>{ const a = -Math.PI/2 + i*Math.PI*2/labels.length, x = cx + Math.cos(a)*(base+18), y = cy + Math.sin(a)*(base+18); ctx.fillText(label, x-12, y+4); });
+  labels.forEach((label, i) => {
+    const a = -Math.PI / 2 + i * Math.PI * 2 / labels.length;
+    const x = cx + Math.cos(a) * (base + 18);
+    const y = cy + Math.sin(a) * (base + 18);
+    ctx.fillText(label, x - 12, y + 4);
+  });
+}
+
+function normalizeScore(value) {
+  if (value == null || Number.isNaN(value)) return 0.5;
+  if (value > 1) return value / 100;
+  return value;
+}
+
+function vectorSimilarity(userScores, careerWeights) {
+  let totalWeight = 0;
+  let diff = 0;
+  Object.keys(careerWeights || {}).forEach(key => {
+    const careerValue = normalizeScore(careerWeights[key]);
+    const userValue = normalizeScore(userScores?.[key] ?? 0.5);
+    const weight = Math.max(careerValue, 0.01);
+    totalWeight += weight;
+    diff += Math.abs(userValue - careerValue) * weight;
+  });
+  if (totalWeight === 0) return 0.5;
+  return Math.max(0, 1 - diff / totalWeight);
+}
+
+function topKey(obj) {
+  return Object.entries(obj || {}).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+}
+
+function buildProfile(scores, userMbti) {
+  return {
+    userMbti: userMbti || "unknown",
+    inferredMbti: inferMBTI(scores.mbti),
+    mbti: inferMBTI(scores.mbti),
+    bigFive: scores.bigFive,
+    riasec: scores.riasec,
+    values: scores.values,
+    workStyle: scores.workStyle,
+    skills: {
+      logic: scores.skills.Logic,
+      expression: scores.skills.Expression,
+      execution: scores.skills.Execution,
+      creativity: scores.skills.Creativity,
+      learning: scores.skills.Learning,
+      cooperation: scores.skills.Collaboration
+    },
+    preferences: scores.preferences
+  };
+}
+
+function makeCareer(titleZh, titleEn, categoryZh, categoryEn, descriptionZh, descriptionEn, data) {
+  return {
+    titleZh, titleEn, categoryZh, categoryEn, descriptionZh, descriptionEn,
+    mbti: data.mbti || ["INTJ"],
+    riasec: data.riasec || {},
+    bigFive: data.bigFive || {},
+    values: data.values || {},
+    workStyle: data.workStyle || {},
+    skills: data.skills || {},
+    preferences: data.preferences || {},
+    physicalDemand: data.physicalDemand ?? 0.5,
+    educationRequirement: data.educationRequirement ?? 0.5,
+    riskLevel: data.riskLevel ?? 0.5,
+    stabilityLevel: data.stabilityLevel ?? 0.5
+  };
+}
+
+const careerProfiles = [
+  makeCareer("软件工程师", "Software Engineer", "技术研发类", "Technology", "适合复杂逻辑、持续学习和深度工作。", "For complex logic, learning, and deep work.", {
+    mbti: ["INTJ","INTP","ISTJ","ISTP"], riasec: { Investigative: 0.96, Conventional: 0.68 }, bigFive: { Conscientiousness: 0.8, Extraversion: 0.25 },
+    values: { Wealth: 0.7, Achievement: 0.8, Freedom: 0.6 }, workStyle: { DeepWork: 0.96, Execution: 0.78 }, skills: { logic: 0.96, learning: 0.88 },
+    preferences: { physicalPreference: 0.1, stabilityPreference: 0.5, riskTolerance: 0.35, competitionPreference: 0.35, gameInterest: 0.15, outdoorPreference: 0.1, handsOnPreference: 0.4 },
+    physicalDemand: 0.08, educationRequirement: 0.82, riskLevel: 0.3, stabilityLevel: 0.55
+  }),
+  makeCareer("算法工程师", "Algorithm Engineer", "技术研发类", "Technology", "适合高研究型、抽象思考和长期分析。", "For research, abstraction, and long analysis.", {
+    mbti: ["INTJ","INTP","ENTJ"], riasec: { Investigative: 1, Conventional: 0.6 }, bigFive: { Openness: 0.9, Conscientiousness: 0.82 },
+    values: { Achievement: 0.85, Wealth: 0.72 }, workStyle: { DeepWork: 0.98, Execution: 0.72 }, skills: { logic: 1, learning: 0.92 },
+    preferences: { physicalPreference: 0.05, stabilityPreference: 0.42, riskTolerance: 0.38, competitionPreference: 0.32, gameInterest: 0.1, outdoorPreference: 0.05, handsOnPreference: 0.3 },
+    physicalDemand: 0.05, educationRequirement: 0.95, riskLevel: 0.25, stabilityLevel: 0.5
+  }),
+  makeCareer("数据分析师", "Data Analyst", "技术研发类", "Technology", "适合整理信息、分析趋势和给出建议。", "For organizing data, spotting trends, and giving advice.", {
+    mbti: ["INTJ","INTP","ISTJ"], riasec: { Investigative: 0.94, Conventional: 0.7 }, bigFive: { Conscientiousness: 0.85, Extraversion: 0.25 },
+    values: { Stability: 0.58, Achievement: 0.72 }, workStyle: { DeepWork: 0.9, Execution: 0.72 }, skills: { logic: 0.94, learning: 0.88 },
+    preferences: { physicalPreference: 0.1, stabilityPreference: 0.58, riskTolerance: 0.3, competitionPreference: 0.3, gameInterest: 0.1, outdoorPreference: 0.05, handsOnPreference: 0.35 },
+    physicalDemand: 0.05, educationRequirement: 0.78, riskLevel: 0.25, stabilityLevel: 0.62
+  }),
+  makeCareer("产品经理", "Product Manager", "商业管理类", "Business", "适合协调需求、技术和结果推进。", "For coordinating needs, tech, and delivery.", {
+    mbti: ["ENTJ","ENFJ","ENTP","INTJ"], riasec: { Enterprising: 0.9, Social: 0.6, Investigative: 0.55 }, bigFive: { Extraversion: 0.72, Conscientiousness: 0.72, Openness: 0.72 },
+    values: { Influence: 0.8, Achievement: 0.88, Wealth: 0.72 }, workStyle: { Leadership: 0.82, Collaboration: 0.7, Execution: 0.78 }, skills: { logic: 0.8, expression: 0.82, cooperation: 0.72 },
+    preferences: { physicalPreference: 0.1, stabilityPreference: 0.35, riskTolerance: 0.55, competitionPreference: 0.55, gameInterest: 0.15, outdoorPreference: 0.1, handsOnPreference: 0.3 },
+    physicalDemand: 0.05, educationRequirement: 0.78, riskLevel: 0.5, stabilityLevel: 0.4
+  }),
+  makeCareer("咨询顾问", "Consultant", "商业管理类", "Business", "适合拆解问题、说服和推动变化。", "For problem solving, persuasion, and change.", {
+    mbti: ["ENTJ","ENFJ","ENTP","INTJ"], riasec: { Enterprising: 0.92, Social: 0.75, Investigative: 0.68 }, bigFive: { Extraversion: 0.82, Openness: 0.78 },
+    values: { Influence: 0.9, Achievement: 0.84, Wealth: 0.72 }, workStyle: { Leadership: 0.78, Collaboration: 0.68, Execution: 0.7 }, skills: { logic: 0.8, expression: 0.9, learning: 0.82 },
+    preferences: { physicalPreference: 0.1, stabilityPreference: 0.3, riskTolerance: 0.58, competitionPreference: 0.6, gameInterest: 0.12, outdoorPreference: 0.12, handsOnPreference: 0.22 },
+    physicalDemand: 0.08, educationRequirement: 0.78, riskLevel: 0.58, stabilityLevel: 0.35
+  }),
+  makeCareer("公务员", "Civil Servant", "公共服务类", "Public Service", "适合重规则、重责任和稳定的人。", "For rules, responsibility, and stability.", {
+    mbti: ["ISTJ","ISFJ","ESTJ","INFJ"], riasec: { Conventional: 0.96, Social: 0.45 }, bigFive: { Conscientiousness: 0.9, Neuroticism: 0.28 },
+    values: { Stability: 0.98, SocialImpact: 0.72, WorkLifeBalance: 0.7 }, workStyle: { Execution: 0.88, Collaboration: 0.62 }, skills: { logic: 0.72, execution: 0.9, cooperation: 0.65 },
+    preferences: { physicalPreference: 0.12, stabilityPreference: 0.98, riskTolerance: 0.15, competitionPreference: 0.25, gameInterest: 0.05, outdoorPreference: 0.08, handsOnPreference: 0.2 },
+    physicalDemand: 0.08, educationRequirement: 0.72, riskLevel: 0.12, stabilityLevel: 0.95
+  }),
+  makeCareer("护士", "Nurse", "医疗健康类", "Healthcare", "适合关怀他人并能接受轮班。", "For caring for others and shift work.", {
+    mbti: ["ISFJ","INFJ","ESFJ","ISTJ"], riasec: { Social: 0.94, Conventional: 0.7 }, bigFive: { Agreeableness: 0.92, Conscientiousness: 0.88 },
+    values: { SocialImpact: 0.9, Stability: 0.8 }, workStyle: { Collaboration: 0.92, Execution: 0.9 }, skills: { expression: 0.62, cooperation: 0.9 },
+    preferences: { physicalPreference: 0.55, stabilityPreference: 0.82, riskTolerance: 0.28, competitionPreference: 0.2, gameInterest: 0.05, outdoorPreference: 0.2, handsOnPreference: 0.72 },
+    physicalDemand: 0.62, educationRequirement: 0.72, riskLevel: 0.28, stabilityLevel: 0.82
+  }),
+  makeCareer("编剧", "Screenwriter", "创意内容类", "Creative", "适合长期创作、表达和打磨文本。", "For long-form creation, expression, and writing.", {
+    mbti: ["INFP","INFJ","ENFP","INTJ"], riasec: { Artistic: 1, Investigative: 0.4 }, bigFive: { Openness: 0.98, Extraversion: 0.32 },
+    values: { Freedom: 0.85, Achievement: 0.62 }, workStyle: { DeepWork: 0.82, Creativity: 1 }, skills: { expression: 0.9, creativity: 1, learning: 0.75 },
+    preferences: { physicalPreference: 0.1, stabilityPreference: 0.25, riskTolerance: 0.42, competitionPreference: 0.22, gameInterest: 0.15, outdoorPreference: 0.12, handsOnPreference: 0.25 },
+    physicalDemand: 0.05, educationRequirement: 0.65, riskLevel: 0.45, stabilityLevel: 0.32
+  }),
+  makeCareer("设计师", "Designer", "创意内容类", "Creative", "适合创意表达、视觉审美和方案设计。", "For creative expression, visual taste, and design.", {
+    mbti: ["INFP","INTP","ENFP","ISFP"], riasec: { Artistic: 0.98, Investigative: 0.35 }, bigFive: { Openness: 0.95, Extraversion: 0.35 },
+    values: { Freedom: 0.8, Achievement: 0.65 }, workStyle: { Creativity: 1, DeepWork: 0.7 }, skills: { creativity: 1, expression: 0.68 },
+    preferences: { physicalPreference: 0.08, stabilityPreference: 0.32, riskTolerance: 0.4, competitionPreference: 0.3, gameInterest: 0.1, outdoorPreference: 0.1, handsOnPreference: 0.5 },
+    physicalDemand: 0.05, educationRequirement: 0.62, riskLevel: 0.42, stabilityLevel: 0.38
+  }),
+  makeCareer("电工", "Electrician", "技能体力类", "Skilled Trades", "适合动手操作、现场解决问题。", "For hands-on, field problem solving.", {
+    mbti: ["ISTP","ESTP","ISFP"], riasec: { Realistic: 0.98, Conventional: 0.45 }, bigFive: { Extraversion: 0.38, Conscientiousness: 0.72 },
+    values: { Stability: 0.55, Wealth: 0.58 }, workStyle: { Execution: 0.92, RiskTolerance: 0.55 }, skills: { execution: 0.92, logic: 0.62 },
+    preferences: { physicalPreference: 0.95, handsOnPreference: 0.98, outdoorPreference: 0.9, stabilityPreference: 0.45, riskTolerance: 0.55, competitionPreference: 0.4, gameInterest: 0.05 },
+    physicalDemand: 0.98, educationRequirement: 0.35, riskLevel: 0.48, stabilityLevel: 0.5
+  }),
+  makeCareer("厨师", "Chef", "技能体力类", "Skilled Trades", "适合高强度节奏、动手和技能打磨。", "For fast-paced hands-on skill practice.", {
+    mbti: ["ESTP","ESFP","ISFP","ISTP"], riasec: { Realistic: 0.82, Artistic: 0.4, Conventional: 0.45 }, bigFive: { Extraversion: 0.45, Conscientiousness: 0.72 },
+    values: { Wealth: 0.55, Achievement: 0.65 }, workStyle: { Execution: 0.9, Creativity: 0.55 }, skills: { execution: 0.88, creativity: 0.55 },
+    preferences: { physicalPreference: 0.86, handsOnPreference: 0.9, competitionPreference: 0.45, stabilityPreference: 0.5, riskTolerance: 0.45, gameInterest: 0.05, outdoorPreference: 0.2 },
+    physicalDemand: 0.9, educationRequirement: 0.4, riskLevel: 0.48, stabilityLevel: 0.5
+  }),
+  makeCareer("职业运动员", "Professional Athlete", "体育娱乐类", "Sports & Entertainment", "适合高训练、高竞争和高体能消耗。", "For intense training, competition, and physical demand.", {
+    mbti: ["ESTP","ESFP","ISTP"], riasec: { Realistic: 0.98, Enterprising: 0.45 }, bigFive: { Extraversion: 0.78, Conscientiousness: 0.78 },
+    values: { Achievement: 0.95, Influence: 0.65, Stability: 0.2 }, workStyle: { Execution: 0.95, RiskTolerance: 0.82, Leadership: 0.55 }, skills: { execution: 0.95, learning: 0.68 },
+    preferences: { physicalPreference: 1, competitionPreference: 1, riskTolerance: 0.9, outdoorPreference: 0.95, stabilityPreference: 0.15, gameInterest: 0.2, handsOnPreference: 0.8 },
+    physicalDemand: 1, educationRequirement: 0.35, riskLevel: 0.9, stabilityLevel: 0.15
+  }),
+  makeCareer("电竞职业选手", "Esports Player", "体育娱乐类", "Sports & Entertainment", "适合游戏兴趣强、竞争意识强的人。", "For strong game interest and competitiveness.", {
+    mbti: ["ESTP","ENTP","ESFP","INTP"], riasec: { Enterprising: 0.5, Realistic: 0.35 }, bigFive: { Extraversion: 0.62, Conscientiousness: 0.7 },
+    values: { Achievement: 0.95, Wealth: 0.7, Stability: 0.15 }, workStyle: { Execution: 0.95, RiskTolerance: 0.92 }, skills: { execution: 0.95, learning: 0.72 },
+    preferences: { gameInterest: 1, competitionPreference: 1, riskTolerance: 0.95, physicalPreference: 0.45, stabilityPreference: 0.1, outdoorPreference: 0.2, handsOnPreference: 0.55 },
+    physicalDemand: 0.4, educationRequirement: 0.4, riskLevel: 0.95, stabilityLevel: 0.1
+  }),
+  makeCareer("自媒体博主", "Content Creator", "自由职业类", "Freelance", "适合独立表达、持续输出和流量运营。", "For independent expression, output, and traffic building.", {
+    mbti: ["ENFP","ENTP","ESFP","INFP"], riasec: { Artistic: 0.78, Enterprising: 0.8, Social: 0.6 }, bigFive: { Extraversion: 0.75, Openness: 0.85 },
+    values: { Freedom: 0.9, Influence: 0.85, Wealth: 0.6 }, workStyle: { Creativity: 0.85, Leadership: 0.55 }, skills: { expression: 0.92, creativity: 0.9 },
+    preferences: { riskTolerance: 0.7, stabilityPreference: 0.2, gameInterest: 0.35, physicalPreference: 0.1, competitionPreference: 0.55, outdoorPreference: 0.2, handsOnPreference: 0.25 },
+    physicalDemand: 0.08, educationRequirement: 0.45, riskLevel: 0.72, stabilityLevel: 0.2
+  }),
+  makeCareer("创业者", "Entrepreneur", "自由职业类", "Freelance", "适合高风险、高自主和资源整合。", "For high risk, autonomy, and resource orchestration.", {
+    mbti: ["ENTJ","ENTP","ENFJ"], riasec: { Enterprising: 1, Social: 0.65, Investigative: 0.5 }, bigFive: { Extraversion: 0.8, Openness: 0.78 },
+    values: { Wealth: 0.78, Freedom: 0.92, Influence: 0.9, Achievement: 0.9 }, workStyle: { Leadership: 0.95, RiskTolerance: 0.95, Execution: 0.82 }, skills: { expression: 0.9, logic: 0.7, cooperation: 0.72 },
+    preferences: { riskTolerance: 1, stabilityPreference: 0.05, competitionPreference: 0.9, gameInterest: 0.2, physicalPreference: 0.1, outdoorPreference: 0.1, handsOnPreference: 0.2 },
+    physicalDemand: 0.1, educationRequirement: 0.6, riskLevel: 1, stabilityLevel: 0.05
+  })
+];
+
+function calculateCareerMatches(profile) {
+  const userMbti = profile.userMbti || "unknown";
+  const inferredMbti = profile.inferredMbti || profile.mbti || "UNKNOWN";
+  return careerProfiles.map(career => {
+    const riasecScore = vectorSimilarity(profile.riasec, career.riasec);
+    const bigFiveScore = vectorSimilarity(profile.bigFive, career.bigFive);
+    const valuesScore = vectorSimilarity(profile.values, career.values);
+    const workStyleScore = vectorSimilarity(profile.workStyle, career.workStyle);
+    const skillsScore = vectorSimilarity(profile.skills, career.skills);
+    const preferencesScore = vectorSimilarity(profile.preferences, career.preferences);
+    const mbtiScore = career.mbti?.includes(inferredMbti) ? 1 : 0.45;
+    const userMbtiBonus = userMbti !== "unknown" && career.mbti?.includes(userMbti) ? 0.02 : 0;
+    const physicalScore = 1 - Math.abs(normalizeScore(profile.preferences?.physicalPreference ?? 0.5) - normalizeScore(career.physicalDemand ?? 0.5));
+    const stabilityScore = 1 - Math.abs(normalizeScore(profile.preferences?.stabilityPreference ?? 0.5) - normalizeScore(career.stabilityLevel ?? 0.5));
+    const riskScore = 1 - Math.abs(normalizeScore(profile.preferences?.riskTolerance ?? 0.5) - normalizeScore(career.riskLevel ?? 0.5));
+    const finalScore = riasecScore * 0.23 + bigFiveScore * 0.16 + valuesScore * 0.15 + workStyleScore * 0.12 + skillsScore * 0.10 + preferencesScore * 0.10 + mbtiScore * 0.05 + physicalScore * 0.04 + stabilityScore * 0.03 + riskScore * 0.02 + userMbtiBonus;
+    const reasons = generateCareerReasons(profile, career);
+    const risks = generateCareerRisks(profile, career);
+    return {
+      ...career,
+      score: Math.round(Math.min(finalScore, 1) * 100),
+      reasonsZh: reasons.zh,
+      reasonsEn: reasons.en,
+      risksZh: risks.zh,
+      risksEn: risks.en
+    };
+  }).sort((a, b) => b.score - a.score).slice(0, 10);
+}
+
+function generateCareerReasons(profile, career) {
+  const reasons = [];
+  const reasonsEn = [];
+  const r = profile.riasec || {};
+  const v = profile.values || {};
+  const s = profile.skills || {};
+  const p = profile.preferences || {};
+  if ((r.Investigative ?? 0) > 0.7 && (career.riasec?.Investigative ?? 0) > 0.7) { reasons.push("你的研究型兴趣较强，适合分析、验证和解决复杂问题。"); reasonsEn.push("Your investigative interest is strong, making this a fit for analysis, validation, and complex problem solving."); }
+  if ((r.Artistic ?? 0) > 0.7 && (career.riasec?.Artistic ?? 0) > 0.7) { reasons.push("你的艺术型兴趣较高，适合创意表达、内容生产或设计工作。"); reasonsEn.push("Your artistic interest is high, making this a good fit for creative expression, content, or design work."); }
+  if ((r.Realistic ?? 0) > 0.7 && (career.riasec?.Realistic ?? 0) > 0.7) { reasons.push("你对动手实践和现场型任务接受度较高，适合实践型职业。"); reasonsEn.push("You are comfortable with hands-on and field-based work, which fits practical roles."); }
+  if ((r.Enterprising ?? 0) > 0.7 && (career.riasec?.Enterprising ?? 0) > 0.7) { reasons.push("你有较强的企业型倾向，适合商业、管理和影响力导向岗位。"); reasonsEn.push("Your enterprising tendency fits business, management, and influence-oriented roles."); }
+  if ((r.Social ?? 0) > 0.7 && (career.riasec?.Social ?? 0) > 0.7) { reasons.push("你有较强的社会型倾向，适合协作、支持和帮助他人的工作。"); reasonsEn.push("Your social tendency fits collaborative and helping roles."); }
+  if ((v.Stability ?? 0) > 0.7 && (career.values?.Stability ?? 0) > 0.7) { reasons.push("你重视稳定保障，这个方向能提供更可预期的节奏。"); reasonsEn.push("You value stability, and this path offers a more predictable pace."); }
+  if ((v.Freedom ?? 0) > 0.7 && (career.values?.Freedom ?? 0) > 0.7) { reasons.push("你重视自由度，这个方向通常有更高的自主空间。"); reasonsEn.push("You value freedom, and this path usually provides more autonomy."); }
+  if ((v.Wealth ?? 0) > 0.7 && (career.values?.Wealth ?? 0) > 0.7) { reasons.push("你重视收入回报，这个方向具备较好的收入想象空间。"); reasonsEn.push("You value income, and this path has strong earning potential."); }
+  if ((s.logic ?? 0) > 0.7 && (career.skills?.logic ?? 0) > 0.7) { reasons.push("你的逻辑能力较强，能胜任需要结构化分析的任务。"); reasonsEn.push("Your logic skill supports structured analysis tasks."); }
+  if ((s.expression ?? 0) > 0.7 && (career.skills?.expression ?? 0) > 0.7) { reasons.push("你的表达能力较强，适合沟通、说服或内容输出。"); reasonsEn.push("Your expression skill fits communication, persuasion, and content output."); }
+  if ((p.gameInterest ?? 0) > 0.7 && /电竞|游戏/.test(career.titleZh)) { reasons.push("你对游戏和电竞兴趣较强，行业匹配度更高。"); reasonsEn.push("Your game interest is strong, so the esports/gaming match is higher."); }
+  if ((p.physicalPreference ?? 0) > 0.7 && (career.physicalDemand ?? 0) > 0.7) { reasons.push("你对体力或现场型工作接受度较高，能适应该职业需求。"); reasonsEn.push("You are comfortable with physical or field work, which matches this role."); }
+  if ((p.riskTolerance ?? 0) > 0.7 && (career.riskLevel ?? 0) > 0.7) { reasons.push("你对风险承受度较高，适合探索上限更高的路径。"); reasonsEn.push("Your risk tolerance supports higher-upside exploration."); }
+  if (!reasons.length) { reasons.push("这个方向与你当前画像的多项指标存在中高程度匹配。"); reasonsEn.push("This path has a moderate-to-strong fit with your current profile."); }
+  return { zh: reasons.slice(0, 3), en: reasonsEn.slice(0, 3) };
+}
+
+function generateCareerRisks(profile, career) {
+  const risks = [];
+  const risksEn = [];
+  const p = profile.preferences || {};
+  const s = profile.skills || {};
+  if ((career.riskLevel ?? 0.5) > 0.7 && (p.riskTolerance ?? 0.5) < 0.45) { risks.push("该职业不确定性较高，如果你更偏好稳定，需要谨慎考虑。"); risksEn.push("This role is highly uncertain, so be cautious if you prefer stability."); }
+  if ((career.physicalDemand ?? 0.5) > 0.7 && (p.physicalPreference ?? 0.5) < 0.45) { risks.push("该职业体力消耗较高，如果你不喜欢长期站立或移动，可能会感到疲惫。"); risksEn.push("This role is physically demanding and may feel exhausting if you dislike long periods of standing or moving."); }
+  if ((career.educationRequirement ?? 0.5) > 0.7 && (s.learning ?? 0.5) < 0.45) { risks.push("该职业学习门槛较高，需要长期投入专业训练。"); risksEn.push("This role has a high learning barrier and requires sustained training."); }
+  if ((career.stabilityLevel ?? 0.5) < 0.4 && (p.stabilityPreference ?? 0.5) > 0.65) { risks.push("该方向稳定性一般，可能与你对稳定的偏好冲突。"); risksEn.push("This path is not very stable and may conflict with your preference for stability."); }
+  if ((career.riasec?.Social ?? 0.5) > 0.7 && (profile.bigFive?.Extraversion ?? 0.5) < 0.45) { risks.push("该职业需要较多外部互动，如果你偏内向，可能会消耗精力。"); risksEn.push("This role requires frequent interaction and may drain you if you are more introverted."); }
+  if (!risks.length) { risks.push("需要关注岗位节奏、学习成本和成长路径是否与你的长期目标一致。"); risksEn.push("Check whether the pace, learning cost, and growth path fit your long-term goals."); }
+  return { zh: risks.slice(0, 3), en: risksEn.slice(0, 3) };
+}
+
+function generateUnsuitableDirections(profile) {
+  const list = [];
+  const seen = new Set();
+  const add = (item) => {
+    const key = `${item.titleZh || ""}|${item.titleEn || ""}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    list.push(item);
+  };
+  const bigFive = profile.bigFive || {};
+  const riasec = profile.riasec || {};
+  const values = profile.values || {};
+  const preferences = profile.preferences || {};
+  const workStyle = profile.workStyle || {};
+  const riskTolerance = preferences.riskTolerance ?? workStyle.RiskTolerance ?? 0.5;
+  const physicalPreference = preferences.physicalPreference ?? 0.5;
+  const stabilityPreference = preferences.stabilityPreference ?? values.Stability ?? 0.5;
+  const gameInterest = preferences.gameInterest ?? 0.5;
+  const extraversion = bigFive.Extraversion ?? 0.5;
+  const openness = bigFive.Openness ?? 0.5;
+  const conscientiousness = bigFive.Conscientiousness ?? 0.5;
+  const investigative = riasec.Investigative ?? 0.5;
+  const artistic = riasec.Artistic ?? 0.5;
+  const social = riasec.Social ?? 0.5;
+  if (riskTolerance < 0.45) add({ titleZh: "高风险创业与纯佣金型销售", reasonZh: "你的风险承受倾向相对较低，而这类方向收入波动大、结果不确定、前期压力高。", suggestionZh: "如果仍想尝试，建议先从副业、小项目或低成本试错开始。", titleEn: "High-risk Entrepreneurship and Commission-based Sales", reasonEn: "Your risk tolerance is relatively low, while these paths involve high uncertainty and unstable income.", suggestionEn: "Start with small side projects before committing full-time." });
+  if (physicalPreference < 0.45) add({ titleZh: "高体力消耗型现场工作", reasonZh: "你的体力偏好较低，而建筑施工、外卖骑手、消防员、职业运动员等方向对体能和耐受力要求较高。", suggestionZh: "如果仍想尝试，应先评估体能、作息和长期健康成本。", titleEn: "Physically Demanding Field Work", reasonEn: "Your physical-work preference is low, while these jobs require stamina and long-term endurance.", suggestionEn: "Evaluate physical capacity and health cost before entering." });
+  if (extraversion < 0.45 && social < 0.45) add({ titleZh: "高频社交与强外向输出岗位", reasonZh: "你的外向性和社会型兴趣不算突出，而销售、商务拓展、主持、直播、客户服务等方向需要持续表达和高频互动。", suggestionZh: "如果仍想尝试，建议选择低频、高质量沟通型岗位。", titleEn: "High-frequency Social Interaction Roles", reasonEn: "Your extraversion and social interest are low, while these roles require constant communication.", suggestionEn: "Prefer low-frequency but high-quality communication roles." });
+  if (conscientiousness < 0.45) add({ titleZh: "高规则、高细节、强流程岗位", reasonZh: "你的尽责性分数不算突出，而财务、审计、法务、合规、档案管理等方向要求长期细致、稳定和低失误率。", suggestionZh: "如果仍想尝试，需要先训练清单化工作、细节校验和长期稳定执行能力。", titleEn: "Highly Regulated and Detail-oriented Roles", reasonEn: "These roles require strong detail orientation and long-term reliability.", suggestionEn: "Build checklist-based execution and detail-checking habits first." });
+  if (openness < 0.45 && artistic < 0.45) add({ titleZh: "强创意表达型职业", reasonZh: "你的开放性和艺术型兴趣不算突出，而设计、编剧、内容创作、品牌创意等方向需要持续产出新想法。", suggestionZh: "如果仍想尝试，建议先从结构化内容或模板化设计开始。", titleEn: "Highly Creative Expression Roles", reasonEn: "These roles require continuous creative output and open exploration.", suggestionEn: "Start from structured content or template-based design roles." });
+  if (investigative < 0.45) add({ titleZh: "长期研究与高抽象分析方向", reasonZh: "你的研究型兴趣不算突出，而科研、算法、数据科学、战略研究等方向需要长期深度学习和抽象思考。", suggestionZh: "如果仍想尝试，建议选择应用型分析岗位。", titleEn: "Long-term Research and Abstract Analysis", reasonEn: "These paths require sustained deep learning and abstract reasoning.", suggestionEn: "Choose applied analysis roles rather than pure research roles." });
+  if (stabilityPreference > 0.65) add({ titleZh: "高度不稳定的自由职业与流量型职业", reasonZh: "你对稳定性的偏好较高，而自媒体、演艺、职业电竞、自由接单等方向收入和机会波动明显。", suggestionZh: "如果仍想尝试，建议保留主业或稳定现金流。", titleEn: "Unstable Freelance and Traffic-driven Careers", reasonEn: "You prefer stability, while these careers often have volatile income and opportunities.", suggestionEn: "Keep a stable income source while experimenting part-time." });
+  if (gameInterest < 0.45) add({ titleZh: "游戏电竞深度相关职业", reasonZh: "你的游戏或电竞兴趣不高，而电竞选手、电竞教练、游戏主播、赛事运营等方向需要长期沉浸在游戏生态中。", suggestionZh: "如果仍想进入该行业，可优先考虑外围岗位。", titleEn: "Game and Esports-focused Careers", reasonEn: "These roles require long-term immersion in gaming culture and esports ecosystems.", suggestionEn: "Consider peripheral roles such as operations or marketing support." });
+  const fallbackItems = [
+    { titleZh: "强烈依赖社交场景的前台服务", reasonZh: "这类岗位需要持续面对陌生人、高频即时互动和情绪劳动。", suggestionZh: "可以从低接触、后台支持或流程型岗位试起。", titleEn: "Front-desk Service Heavy on Social Interaction", reasonEn: "These roles require constant face-to-face interaction and emotional labor.", suggestionEn: "Start with low-contact or back-office support roles." },
+    { titleZh: "高度重复且缺少成长空间的流水岗位", reasonZh: "如果你更看重成长，这类岗位容易让你在技能和收入上停滞。", suggestionZh: "优先选择能积累技能或证书的替代方向。", titleEn: "Highly Repetitive Low-growth Assembly Roles", reasonEn: "These roles may limit skill and income growth if you value development.", suggestionEn: "Choose alternatives that build skills or credentials." },
+    { titleZh: "需要长期独立承压的单兵作战岗位", reasonZh: "这类方向往往缺少协作支持，且容易把压力长期压在个人身上。", suggestionZh: "先评估自己是否需要更明确的团队支持和反馈。", titleEn: "Solo Roles Requiring Sustained Pressure Handling", reasonEn: "These roles often lack support and can keep pressure on one person for long periods.", suggestionEn: "Check whether you need more team support and feedback." },
+    { titleZh: "高频出差且节奏极不稳定的岗位", reasonZh: "如果你更偏好秩序感，这类工作会持续打乱你的生活节奏。", suggestionZh: "只有在有明确收益时再考虑。", titleEn: "Frequent Travel with Highly Unstable Schedules", reasonEn: "If you prefer structure, this can constantly disrupt your rhythm.", suggestionEn: "Consider it only when the tradeoff is clearly worth it." },
+    { titleZh: "纯靠人脉和即时反应驱动的机会型工作", reasonZh: "这类方向对临场反应和关系维护要求很高，且结果波动明显。", suggestionZh: "可优先选择规则更清晰、方法更可复制的路径。", titleEn: "Opportunity-driven Work Based Mainly on Network and Instinct", reasonEn: "These paths depend heavily on improvisation and relationship maintenance.", suggestionEn: "Prefer paths with clearer rules and repeatable methods." }
+  ];
+  fallbackItems.forEach(add);
+  return list.slice(0, 8);
+}
+
+function generateThreeYearRoadmap(profile, careerMatches) {
+  const topCats = careerMatches.slice(0, 3).map(x => x.categoryZh);
+  const isTech = topCats.some(x => /技术研发|技术/.test(x));
+  const isBusiness = topCats.some(x => /商业|管理/.test(x));
+  const isCreative = topCats.some(x => /创意|内容/.test(x));
+  const isSkilled = topCats.some(x => /技能|体力/.test(x));
+  const isSports = topCats.some(x => /体育|娱乐/.test(x));
+  const isPublic = topCats.some(x => /公共服务/.test(x));
+  const list = [
+    { yearZh: "第1年：定位与基础建设", goalZh: "明确主方向与备选方向，补齐底层能力。", actionsZh: ["确定 Top 3 目标职业", "补齐最薄弱的 1-2 项基础技能", "完成 2-3 个可展示项目或实践案例", "建立每周学习和复盘节奏"], milestonesZh: ["形成第一版职业画像", "完成至少一个作品集或项目", "获得一次真实反馈"], risksZh: ["方向过多导致分散", "只学不做，缺少验证"] },
+    { yearZh: "第2年：进入真实场景", goalZh: "把能力放到真实任务里，积累可证明的结果。", actionsZh: ["争取实习、兼职、项目或比赛", "积累一两个明确成果指标", "形成稳定的输出习惯", "观察行业规则与工作方式"], milestonesZh: ["有可讲述的真实案例", "能独立完成核心任务", "建立行业认知框架"], risksZh: ["只停留在学习阶段", "反馈不足导致误判"] },
+    { yearZh: "第3年：形成竞争力标签", goalZh: "沉淀个人标签，提高议价能力，尝试更高平台。", actionsZh: ["沉淀一项核心优势标签", "拓展更高平台或更高收入机会", "完善作品集、简历与面试表达", "准备备选路径和转型预案"], milestonesZh: ["有清晰职业标签", "形成稳定的收入或成长路径", "能独立判断下一步选择"], risksZh: ["过度追求上限忽略适配", "忽视身体和心理消耗"] }
+  ];
+  if (isTech) {
+    list[0].actionsZh.push("强化编程、数据分析、算法或 GitHub 作品");
+    list[1].actionsZh.push("用项目、论文或实验结果证明能力");
+    list[2].actionsZh.push("为技术深耕或产品/管理转向准备路线");
+  }
+  if (isBusiness) {
+    list[0].actionsZh.push("练习商业分析、沟通表达和项目推进");
+    list[1].actionsZh.push("在真实业务里积累可量化成果");
+    list[2].actionsZh.push("建立行业视角与管理/商业标签");
+  }
+  if (isCreative) {
+    list[0].actionsZh.push("持续输出作品集和内容");
+    list[1].actionsZh.push("提升审美、发布频率和复盘机制");
+    list[2].actionsZh.push("形成个人风格与稳定输出渠道");
+  }
+  if (isSkilled) {
+    list[0].actionsZh.push("考取技能证书并接受带教");
+    list[1].actionsZh.push("累积实操工时和标准化经验");
+    list[2].actionsZh.push("维护体能并重视安全规范");
+  }
+  if (isSports) {
+    list[0].actionsZh.push("建立训练计划和复盘体系");
+    list[1].actionsZh.push("追踪排名、比赛和阶段成绩");
+    list[2].actionsZh.push("提前准备转型路径和职业寿命管理");
+  }
+  if (isPublic) {
+    list[0].actionsZh.push("规划考试、材料和政策认知");
+    list[1].actionsZh.push("保持稳定复习和执行节奏");
+    list[2].actionsZh.push("提前熟悉岗位规则和流程要求");
+  }
+  return list;
+}
+
+function generateLearningAdvice(profile, careerMatches) {
+  const top3 = careerMatches.slice(0, 3);
+  const titles = top3.map(x => x.titleZh).join("、");
+  const categories = careerMatches.slice(0, 3).map(x => x.categoryZh);
+  const tech = categories.some(x => /技术研发|技术/.test(x));
+  const business = categories.some(x => /商业|管理|公共服务/.test(x));
+  const creative = categories.some(x => /创意|内容/.test(x));
+  const skilled = categories.some(x => /技能|体力|农业/.test(x));
+  const sports = categories.some(x => /体育|娱乐/.test(x));
+  const publicService = categories.some(x => /公共服务/.test(x));
+  const list = [
+    { titleZh: "通用底层能力", contentZh: "先稳住逻辑表达、信息整理、时间管理和自我复盘。", reasonZh: "这些能力对大多数职业都有效。", actionZh: "每周固定一次复盘，记录收获、问题和下一步。", titleEn: "Core Fundamentals", contentEn: "Stabilize logic, communication, organization, and self-review first.", reasonEn: "These skills help in almost every career path.", actionEn: "Do one weekly review of wins, issues, and next steps." },
+    { titleZh: "目标职业核心技能", contentZh: `围绕 Top 3 方向 ${titles} 练最关键的一项硬技能。`, reasonZh: "核心技能比广泛学习更容易形成可迁移优势。", actionZh: "把技能拆成 3 个小目标，按月推进。", titleEn: "Core Skills for Target Roles", contentEn: `Focus on the most important hard skill for your Top 3 paths: ${titles}.`, reasonEn: "Focused skill-building creates faster progress.", actionEn: "Break the skill into three monthly milestones." },
+    { titleZh: "作品集 / 项目经验", contentZh: "做出 2-3 个能展示的项目、案例、作品或实战记录。", reasonZh: "没有可验证成果，就很难证明你的匹配度。", actionZh: "把过程、结果和反思整理成一页简介。", titleEn: "Portfolio / Project Experience", contentEn: "Build 2-3 showable projects, cases, works, or practice records.", reasonEn: "Visible outcomes make your fit easier to prove.", actionEn: "Summarize process, result, and reflection on one page." },
+    { titleZh: "行业认知", contentZh: "持续了解行业趋势、岗位差异、收入结构和成长路径。", reasonZh: "对行业越清楚，越容易避免走弯路。", actionZh: "每月读 2 篇行业文章或访谈。", titleEn: "Industry Awareness", contentEn: "Keep learning industry trends, role differences, and growth paths.", reasonEn: "Clearer industry awareness reduces detours.", actionEn: "Read two industry articles or interviews each month." },
+    { titleZh: "简历与面试表达", contentZh: "把经历写成结果导向的表达，不只是描述做过什么。", reasonZh: "职业竞争里，表达方式会直接影响机会。", actionZh: "练习 STAR 结构：情境、任务、行动、结果。", titleEn: "Resume and Interview Storytelling", contentEn: "Present experiences as outcomes, not just tasks.", reasonEn: "How you tell your story directly affects opportunities.", actionEn: "Practice STAR: situation, task, action, result." },
+    { titleZh: "风险控制", contentZh: "提前识别收入波动、体能消耗、学习门槛和转型成本。", reasonZh: "越早识别风险，越能减少试错成本。", actionZh: "为备选方向预留时间和现金流。", titleEn: "Risk Control", contentEn: "Identify income volatility, physical cost, learning cost, and switch cost early.", reasonEn: "Earlier risk awareness lowers trial-and-error costs.", actionEn: "Reserve time and cash flow for backup options." },
+    { titleZh: "复盘周期", contentZh: "用 4-8 周为一个复盘周期，持续修正方向。", reasonZh: "职业选择不是一次性决策，而是持续校准。", actionZh: "每个周期只保留一个重点改进项。", titleEn: "Review Cycle", contentEn: "Use a 4-8 week review cycle and keep adjusting.", reasonEn: "Career choice is calibration, not a one-time decision.", actionEn: "Keep only one improvement focus per cycle." },
+    { titleZh: "备选方向", contentZh: "同时保留一个更稳妥的备选路径，避免单点押注。", reasonZh: "当主方向不稳定时，备选路径能降低焦虑和风险。", actionZh: "给备选方向安排最少量的持续投入。", titleEn: "Backup Path", contentEn: "Keep one safer backup path alongside the main route.", reasonEn: "A backup path lowers anxiety and risk.", actionEn: "Reserve a small but consistent effort for the backup route." }
+  ];
+  if (tech) list[1].contentZh += " 例如编程、数据分析、算法、GitHub 作品集等。";
+  if (business) list[1].contentZh += " 例如行业分析、商业案例、沟通表达、项目管理等。";
+  if (creative) list[1].contentZh += " 例如作品集、持续发布、审美训练和内容复盘等。";
+  if (skilled) list[1].contentZh += " 例如技能证书、实操工时、师傅带教和安全规范等。";
+  if (sports) list[1].contentZh += " 例如训练计划、排名成绩、赛事经验和身体管理等。";
+  if (publicService) list[1].contentZh += " 例如考试规划、材料准备、稳定执行和政策了解等。";
+  return list;
+}
+
+function renderBigFive(profile) {
+  return Object.entries(profile.bigFive || {}).map(([k, v]) => `
+    <div class="metric">
+      <div class="row"><span>${t(k, lang)}</span><span>${Math.round(normalizeScore(v) * 100)}%</span></div>
+      <div class="bar"><div style="width:${Math.round(normalizeScore(v) * 100)}%"></div></div>
+    </div>
+  `).join("");
+}
+
+function renderCareerCards(careerMatches) {
+  return careerMatches.map(item => {
+    const physical = item.physicalDemand >= 0.7 ? (lang === "zh" ? "高" : "High") : item.physicalDemand >= 0.4 ? (lang === "zh" ? "中" : "Medium") : (lang === "zh" ? "低" : "Low");
+    const stability = item.stabilityLevel >= 0.7 ? (lang === "zh" ? "高" : "High") : item.stabilityLevel >= 0.4 ? (lang === "zh" ? "中" : "Medium") : (lang === "zh" ? "低" : "Low");
+    const risk = item.riskLevel >= 0.7 ? (lang === "zh" ? "高" : "High") : item.riskLevel >= 0.4 ? (lang === "zh" ? "中" : "Medium") : (lang === "zh" ? "低" : "Low");
+    const reasons = lang === "zh" ? item.reasonsZh : item.reasonsEn;
+    const risks = lang === "zh" ? item.risksZh : item.risksEn;
+    return `
+      <div class="card" style="background:#fff;margin-bottom:10px;width:100%">
+        <strong>${lang === "zh" ? item.titleZh : item.titleEn}</strong>
+        <p>${lang === "zh" ? item.categoryZh : item.categoryEn}</p>
+        <p>${lang === "zh" ? "匹配度" : "Match"}：${item.score}%</p>
+        <p>${lang === "zh" ? "体力要求" : "Physical"}：${physical} · ${lang === "zh" ? "稳定性" : "Stability"}：${stability} · ${lang === "zh" ? "风险水平" : "Risk"}：${risk}</p>
+        <p><strong>${lang === "zh" ? "推荐理由" : "Reasons"}：</strong>${(reasons || []).join(" ")}</p>
+        <p><strong>${lang === "zh" ? "注意事项" : "Notes"}：</strong>${(risks || []).join(" ")}</p>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderDirections(list) {
+  return list.map(item => `
+    <div class="card" style="background:#fff;margin-bottom:10px;width:100%">
+      <strong>${lang === "zh" ? item.titleZh : item.titleEn}</strong>
+      <p><strong>${lang === "zh" ? "不适合原因" : "Reason"}：</strong>${lang === "zh" ? item.reasonZh : item.reasonEn}</p>
+      <p><strong>${lang === "zh" ? "如果仍想尝试" : "If you still want to try"}：</strong>${lang === "zh" ? item.suggestionZh : item.suggestionEn}</p>
+    </div>
+  `).join("");
+}
+
+function renderRoadmap(list) {
+  return list.map(year => `
+    <div class="card roadmap-card" style="background:#fff;margin-bottom:10px;width:100%">
+      <h3>${year.yearZh}</h3>
+      <p><strong>${lang === "zh" ? "核心目标" : "Core Goal"}：</strong>${year.goalZh}</p>
+      <p><strong>${lang === "zh" ? "关键行动" : "Key Actions"}：</strong></p>
+      <ul>${year.actionsZh.map(x => `<li>${x}</li>`).join("")}</ul>
+      <p><strong>${lang === "zh" ? "阶段里程碑" : "Milestones"}：</strong></p>
+      <ul>${year.milestonesZh.map(x => `<li>${x}</li>`).join("")}</ul>
+      <p><strong>${lang === "zh" ? "主要风险" : "Risks"}：</strong></p>
+      <ul>${year.risksZh.map(x => `<li>${x}</li>`).join("")}</ul>
+    </div>
+  `).join("");
+}
+
+function renderLearning(list) {
+  return list.map(item => `
+    <div class="card" style="background:#fff;margin-bottom:10px;width:100%">
+      <h3>${lang === "zh" ? item.titleZh : item.titleEn}</h3>
+      <p><strong>${lang === "zh" ? "具体建议" : "Advice"}：</strong>${lang === "zh" ? item.contentZh : item.contentEn}</p>
+      <p><strong>${lang === "zh" ? "为什么重要" : "Why it matters"}：</strong>${lang === "zh" ? item.reasonZh : item.reasonEn}</p>
+      <p><strong>${lang === "zh" ? "执行方式" : "How to do it"}：</strong>${lang === "zh" ? item.actionZh : item.actionEn}</p>
+    </div>
+  `).join("");
+}
+
+function buildReport(profile, scores, mbtiPred) {
+  const careerMatches = calculateCareerMatches(profile);
+  const unsuitableDirections = generateUnsuitableDirections(profile, careerMatches);
+  const roadmap = generateThreeYearRoadmap(profile, careerMatches);
+  const learningAdvice = generateLearningAdvice(profile, careerMatches);
+  console.log("用户自填MBTI", profile.userMbti);
+  console.log("用户画像", profile);
+  console.log("职业匹配结果", careerMatches);
+  return {
+    createdAt: new Date().toISOString(),
+    mbtiSelf: profile.userMbti,
+    mbtiPredicted: mbtiPred,
+    profile,
+    scores,
+    careerMatches,
+    unsuitableDirections,
+    roadmap,
+    learningAdvice,
+    overview: lang === "zh" ? `你呈现出 ${mbtiPred} 倾向，整体更接近 ${t(topKey(scores.riasec), lang)} 与 ${t(topKey(scores.workStyle), lang)} 的组合。` : `You show a clear ${mbtiPred} tendency, with a profile closer to ${topKey(scores.riasec)} and ${topKey(scores.workStyle)}.`,
+    consistency: profile.userMbti === "unknown"
+      ? (lang === "zh" ? `你没有填写 MBTI，系统已根据问卷结果推断你的 MBTI 倾向为：${mbtiPred}。` : `You did not fill in MBTI, so the system inferred ${mbtiPred}.`)
+      : profile.userMbti === mbtiPred
+        ? (lang === "zh" ? "你的自填 MBTI 与问卷推断结果基本一致，说明你的自我认知与问卷画像较为接近。" : "Your self-reported MBTI and inferred MBTI are broadly aligned.")
+        : (lang === "zh" ? "你的自填 MBTI 与问卷推断结果存在差异，建议以综合画像为主，不要单独依赖 MBTI。" : "Your self-reported MBTI differs from the inferred result, so rely on the full profile rather than MBTI alone."),
+    valuesSummary: lang === "zh" ? `你最重视的职业价值观是：${t(topKey(scores.values), lang)}。` : `Your strongest career value is ${t(topKey(scores.values), lang)}.`,
+    radarLabels: lang === "zh" ? [t("logic", lang), t("expression", lang), t("execution", lang), t("creativity", lang), t("learning", lang), t("cooperation", lang)] : ["Logic","Expression","Execution","Creativity","Learning","Cooperation"]
+  };
+}
+
+function finish() {
+  document.getElementById("loading").classList.remove("hidden");
+  document.getElementById("loading").scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => {
+    const basicQs = questions.filter(q => q[1] === "basic");
+    const adaptiveQs = adaptiveTake.length ? adaptiveTake : questions.filter(q => q[1] === "adaptive").slice(0, 24);
+    const valuesQs = questions.filter(q => q[1] === "values");
+    const skillsQs = questions.filter(q => q[1] === "skills");
+    const scores = {
+      mbti: {
+        E: avgScore(basicQs, "E"), I: avgScore(basicQs, "I"),
+        S: avgScore(basicQs, "S"), N: avgScore(basicQs, "N"),
+        T: avgScore(basicQs, "T"), F: avgScore(basicQs, "F"),
+        J: avgScore(basicQs, "J"), P: avgScore(basicQs, "P")
+      },
+      bigFive: {
+        Openness: avgScore(basicQs, "Openness"),
+        Conscientiousness: avgScore(basicQs, "Conscientiousness"),
+        Extraversion: avgScore(basicQs, "Extraversion"),
+        Agreeableness: avgScore(basicQs, "Agreeableness"),
+        Neuroticism: avgScore(basicQs, "Neuroticism")
+      },
+      riasec: {
+        Realistic: avgScore(adaptiveQs, "Realistic"),
+        Investigative: avgScore(adaptiveQs, "Investigative"),
+        Artistic: avgScore(adaptiveQs, "Artistic"),
+        Social: avgScore(adaptiveQs, "Social"),
+        Enterprising: avgScore(adaptiveQs, "Enterprising"),
+        Conventional: avgScore(adaptiveQs, "Conventional")
+      },
+      values: {
+        Wealth: avgScore(valuesQs, "Wealth"),
+        Stability: avgScore(valuesQs, "Stability"),
+        Freedom: avgScore(valuesQs, "Freedom"),
+        Achievement: avgScore(valuesQs, "Achievement"),
+        Influence: avgScore(valuesQs, "Influence"),
+        SocialImpact: avgScore(valuesQs, "SocialImpact"),
+        WorkLifeBalance: avgScore(valuesQs, "WorkLifeBalance")
+      },
+      workStyle: {
+        Leadership: avgScore(adaptiveQs, "Leadership"),
+        Collaboration: avgScore(adaptiveQs, "Collaboration"),
+        DeepWork: avgScore(adaptiveQs, "DeepWork"),
+        Creativity: avgScore(adaptiveQs, "Creativity"),
+        Execution: avgScore(adaptiveQs, "Execution"),
+        RiskTolerance: avgScore(adaptiveQs, "RiskTolerance")
+      },
+      skills: {
+        Logic: avgScore(skillsQs, "Logic"),
+        Expression: avgScore(skillsQs, "Expression"),
+        Execution: avgScore(skillsQs, "Execution"),
+        Creativity: avgScore(skillsQs, "Creativity"),
+        Learning: avgScore(skillsQs, "Learning"),
+        Organization: avgScore(skillsQs, "Organization"),
+        Empathy: avgScore(skillsQs, "Empathy"),
+        StressTolerance: avgScore(skillsQs, "StressTolerance"),
+        Leadership: avgScore(skillsQs, "Leadership"),
+        Collaboration: avgScore(skillsQs, "Collaboration")
+      },
+      preferences: {
+        physicalPreference: Math.max(avgScore(adaptiveQs, "Realistic"), avgScore(skillsQs, "Execution")) / 100,
+        stabilityPreference: avgScore(valuesQs, "Stability") / 100,
+        riskTolerance: avgScore(adaptiveQs, "RiskTolerance") / 100,
+        competitionPreference: avgScore(adaptiveQs, "Enterprising") / 100,
+        gameInterest: Math.max(avgScore(adaptiveQs, "Enterprising"), avgScore(adaptiveQs, "Creativity")) / 100,
+        outdoorPreference: avgScore(adaptiveQs, "Realistic") / 100,
+        handsOnPreference: avgScore(adaptiveQs, "Realistic") / 100
+      }
+    };
+    const mbtiPred = inferMBTI(scores.mbti);
+    const profile = buildProfile(scores, mbtiSelf);
+    const report = buildReport(profile, scores, mbtiPred);
+    state.report = report;
+    state.answers = answers;
+    state.mbtiSelf = mbtiSelf;
+    saveState();
+    renderReport(report);
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("report").classList.remove("hidden");
+    document.getElementById("report").scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 280);
+}
+
+function renderReport(r) {
+  document.getElementById("mbtiTag").textContent = UI[lang].mbtiTag(r.mbtiPredicted, r.mbtiSelf);
+  document.getElementById("overview").textContent = r.overview;
+  document.getElementById("consistency").textContent = r.consistency;
+  document.getElementById("valuesSummary").textContent = r.valuesSummary;
+  document.getElementById("bigFive").innerHTML = renderBigFive(r.profile);
+  document.getElementById("careers").innerHTML = renderCareerCards(r.careerMatches);
+  document.getElementById("avoid").innerHTML = renderDirections(r.unsuitableDirections);
+  document.getElementById("roadmap").innerHTML = renderRoadmap(r.roadmap);
+  document.getElementById("learning").innerHTML = renderLearning(r.learningAdvice);
+  drawRadar(
+    document.getElementById("radar"),
+    [r.scores.skills.Logic, r.scores.skills.Expression, r.scores.skills.Execution, r.scores.skills.Creativity, r.scores.skills.Learning, r.scores.skills.Collaboration],
+    r.radarLabels
+  );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("langBtn").textContent = "中文 / English";
   initMBTI();
   applyLanguage();
-  if(state.report){ renderReport(state.report); document.getElementById("report").classList.remove("hidden"); }
+  if (state.report) {
+    renderReport(state.report);
+    document.getElementById("report").classList.remove("hidden");
+  }
 });
 </script>
 </body>
