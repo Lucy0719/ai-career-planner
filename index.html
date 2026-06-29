@@ -412,7 +412,7 @@ const UI = {
     learning: "学习建议与提醒",
     goHome: "回到首页",
     mbtiTag: (pred, self) => pred + (self && self !== "未知" ? " · " + self : ""),
-    surveyTitle: (stage) => stage === "basic" ? "基础人格问卷" : stage === "values" ? "职业价值观问卷" : stage === "skills" ? "能力自评问卷" : "追问问卷",
+    surveyTitle: (stage) => stage === "basic" ? "基础人格问卷" : stage === "values" ? "职业价值观问卷" : stage === "skills" ? "能力自评问卷" : stage === "careerRole" ? "关于兴趣与职业的补充确认" : stage === "careerDetail" ? "具体方向偏好确认" : stage === "costTolerance" ? "职业代价接受度" : "追问问卷",
     next: "下一题",
     back: "返回",
     nextStage: "进入下一阶段",
@@ -427,7 +427,10 @@ const UI = {
       values: "价值观阶段",
       skills: "能力阶段",
       adaptive: "自适应追问",
-      followup: "方向偏好追问"
+      followup: "方向偏好追问",
+      careerRole: "职业化意愿",
+      careerDetail: "具体方向细分",
+      costTolerance: "职业代价接受度"
     }
   },
   en: {
@@ -460,7 +463,7 @@ const UI = {
     learning: "Learning Suggestions & Notes",
     goHome: "Back Home",
     mbtiTag: (pred, self) => pred + (self && self !== "Unknown" ? " · " + self : ""),
-    surveyTitle: (stage) => stage === "basic" ? "Basic Personality Questionnaire" : stage === "values" ? "Career Values Questionnaire" : stage === "skills" ? "Skill Self-Assessment" : "Adaptive Follow-up",
+    surveyTitle: (stage) => stage === "basic" ? "Basic Personality Questionnaire" : stage === "values" ? "Career Values Questionnaire" : stage === "skills" ? "Skill Self-Assessment" : stage === "careerRole" ? "Interest and Career Confirmation" : stage === "careerDetail" ? "Direction Detail Preference" : stage === "costTolerance" ? "Career Cost Tolerance" : "Adaptive Follow-up",
     next: "Next",
     back: "Back",
     nextStage: "Next Stage",
@@ -475,7 +478,10 @@ const UI = {
       values: "Values",
       skills: "Skills",
       adaptive: "Adaptive",
-      followup: "Direction Follow-up"
+      followup: "Direction Follow-up",
+      careerRole: "Career Intention",
+      careerDetail: "Direction Detail",
+      costTolerance: "Cost Tolerance"
     }
   }
 };
@@ -484,6 +490,110 @@ const MBTI = ["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","IS
 const OPTS_CN = ["非常不同意","不同意","一般","同意","非常同意"];
 const OPTS_EN = ["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"];
 const STORAGE_KEY = "ai-career-offline-mvp";
+const CAREER_FIELDS = [
+  "researchAnalysis","businessManagement","creativeContent","handsOnSkill","careService","sportsEsports","stabilityRule"
+];
+const DEFAULT_FIELD_SCORES = CAREER_FIELDS.reduce((acc, field) => {
+  acc[field] = 0.5;
+  return acc;
+}, {});
+const CAREER_FIELD_LABELS = {
+  researchAnalysis: { zh: "研究分析与复杂问题解决", en: "research, analysis, and complex problem solving" },
+  businessManagement: { zh: "商业管理与组织推动", en: "business management and organizational drive" },
+  creativeContent: { zh: "内容创作与审美表达", en: "content creation and aesthetic expression" },
+  handsOnSkill: { zh: "动手实践与技能制作", en: "hands-on practice and skilled making" },
+  careService: { zh: "照护服务与助人支持", en: "care service and helping support" },
+  sportsEsports: { zh: "竞技、运动与游戏相关方向", en: "competition, sports, and gaming-related paths" },
+  stabilityRule: { zh: "稳定规则与制度化发展", en: "stable, rule-based, institutional paths" }
+};
+const ROLE_OPTIONS = [
+  { labelZh: "主要职业方向", labelEn: "Main career direction", value: "main", score: 1.0 },
+  { labelZh: "可以尝试作为副业或兼职发展", labelEn: "Could try as a side job or part-time path", value: "side", score: 0.65 },
+  { labelZh: "保持兴趣爱好即可", labelEn: "Keep it as a hobby", value: "hobby", score: 0.25 },
+  { labelZh: "暂时还不确定", labelEn: "Not sure yet", value: "unsure", score: 0.5 }
+];
+const CAREER_DETAIL_QUESTIONS = {
+  creativeContent: [
+    "如果要长期输出作品，你更容易投入哪一种表达方式？",
+    "If you were to keep producing work long-term, which form of expression would absorb you most?",
+    [
+      { labelZh: "写文字、观点、故事或脚本", labelEn: "Writing opinions, stories, or scripts", value: "writing", scoreMap: { writingContentPreference: 1 } },
+      { labelZh: "做视频、拍摄、剪辑或镜头表达", labelEn: "Video, shooting, editing, or visual storytelling", value: "video", scoreMap: { videoContentPreference: 1, contentCreation: 0.7 } },
+      { labelZh: "做视觉设计、排版、插画、服装或美妆", labelEn: "Visual design, layout, illustration, fashion, or beauty", value: "visual", scoreMap: { visualDesign: 1, visualCraftPreference: 1 } },
+      { labelZh: "设计玩法、互动体验或游戏内容", labelEn: "Gameplay, interaction, or game content design", value: "gameDesign", scoreMap: { gameDesignPreference: 1 } }
+    ]
+  ],
+  handsOnSkill: [
+    "如果一个成果需要亲手做出来，你更容易沉浸在哪类过程？",
+    "If an outcome has to be made by hand, which process would you most easily get immersed in?",
+    [
+      { labelZh: "调味、火候、烘焙、饮品或餐饮制作", labelEn: "Flavor, heat control, baking, drinks, or food making", value: "food", scoreMap: { foodCraftPreference: 1 } },
+      { labelZh: "工具、设备、机械、维修或电路", labelEn: "Tools, equipment, machinery, repair, or circuits", value: "mechanical", scoreMap: { mechanicalPreference: 1 } },
+      { labelZh: "植物、动物、农业、园艺或自然环境", labelEn: "Plants, animals, agriculture, gardening, or nature", value: "nature", scoreMap: { natureAnimalPreference: 1 } },
+      { labelZh: "手工、造型、装饰、搭配或实物设计", labelEn: "Crafts, styling, decoration, matching, or physical design", value: "craft", scoreMap: { visualCraftPreference: 1 } }
+    ]
+  ],
+  researchAnalysis: [
+    "当一个问题让你想继续查资料时，通常更像是哪一类？",
+    "When a question makes you want to keep researching, what type is it usually?",
+    [
+      { labelZh: "数据规律、趋势预测、模型和逻辑推理", labelEn: "Data patterns, trend prediction, models, and logic", value: "data", scoreMap: { dataPreference: 1 } },
+      { labelZh: "科学机制、技术原理或复杂系统", labelEn: "Scientific mechanisms, technical principles, or complex systems", value: "research", scoreMap: { researchAnalysis: 1 } },
+      { labelZh: "法律规则、制度漏洞、合同与规范", labelEn: "Legal rules, institutional loopholes, contracts, and norms", value: "law", scoreMap: { lawRulePreference: 1 } },
+      { labelZh: "商业现象、资源流动、市场变化", labelEn: "Business phenomena, resource flow, and market changes", value: "business", scoreMap: { businessAnalysisPreference: 1 } },
+      { labelZh: "人的行为、心理动机、社会现象", labelEn: "Human behavior, psychological motives, and social phenomena", value: "social", scoreMap: { socialResearchPreference: 1 } }
+    ]
+  ],
+  careService: [
+    "如果要长期帮助别人，你更能接受哪类帮助方式？",
+    "If you were helping people long-term, which helping style would you accept most?",
+    [
+      { labelZh: "具体照护、陪伴、康复或健康支持", labelEn: "Concrete care, companionship, rehab, or health support", value: "care", scoreMap: { careServicePreference: 1 } },
+      { labelZh: "情绪倾听、心理支持和关系陪伴", labelEn: "Emotional listening, psychological support, and relational companionship", value: "counseling", scoreMap: { counselingPreference: 1 } },
+      { labelZh: "教别人学会某件事", labelEn: "Teaching others to learn something", value: "education", scoreMap: { educationTrainingPreference: 1 } },
+      { labelZh: "提供资源、路径建议或问题分析", labelEn: "Providing resources, path advice, or problem analysis", value: "consulting", scoreMap: { consultingPreference: 1 } }
+    ]
+  ],
+  sportsEsports: [
+    "在竞争或高投入环境里，你更容易被哪类反馈驱动？",
+    "In competitive or high-investment environments, what feedback drives you most?",
+    [
+      { labelZh: "身体表现、动作水平、训练成绩", labelEn: "Physical performance, movement skill, and training results", value: "sport", scoreMap: { sportPerformancePreference: 1 } },
+      { labelZh: "游戏段位、操作水平、对抗表现", labelEn: "Game rank, mechanics, and competitive performance", value: "esports", scoreMap: { esportsPreference: 1 } },
+      { labelZh: "内容播放量、粉丝反馈、直播互动", labelEn: "Views, fan feedback, and streaming interaction", value: "content", scoreMap: { contentCreation: 1 } },
+      { labelZh: "赛事组织、活动运营、社群管理", labelEn: "Event organization, operations, and community management", value: "event", scoreMap: { eventOperationPreference: 1 } }
+    ]
+  ],
+  businessManagement: [
+    "如果要推动一件事落地，你更自然地会关注什么？",
+    "If you had to push something into reality, what would you naturally focus on?",
+    [
+      { labelZh: "商业收益、市场机会和资源配置", labelEn: "Business returns, market opportunities, and resource allocation", value: "business", scoreMap: { businessAnalysisPreference: 1 } },
+      { labelZh: "组织协作、进度推进和项目管理", labelEn: "Team coordination, progress, and project management", value: "project", scoreMap: { projectManagementPreference: 1 } },
+      { labelZh: "沟通说服、谈判、客户和合作", labelEn: "Persuasion, negotiation, clients, and partnerships", value: "communication", scoreMap: { communicationPreference: 1 } },
+      { labelZh: "用户需求、产品体验和方案设计", labelEn: "User needs, product experience, and solution design", value: "product", scoreMap: { productPreference: 1 } }
+    ]
+  ],
+  stabilityRule: [
+    "面对长期稳定路径，你更能接受哪种投入方式？",
+    "For a long-term stable path, which type of investment is most acceptable?",
+    [
+      { labelZh: "备考、证书、制度化筛选", labelEn: "Exam prep, certificates, and institutional screening", value: "exam", scoreMap: { examStabilityPreference: 1 } },
+      { labelZh: "流程、规范、档案、行政和秩序维护", labelEn: "Processes, norms, files, administration, and order maintenance", value: "admin", scoreMap: { adminRulePreference: 1 } },
+      { labelZh: "财务、审计、合规和细节校验", labelEn: "Finance, audit, compliance, and detail checking", value: "finance", scoreMap: { financeRulePreference: 1 } },
+      { labelZh: "公共服务、基层事务和稳定执行", labelEn: "Public service, grassroots affairs, and stable execution", value: "public", scoreMap: { publicServicePreference: 1 } }
+    ]
+  ]
+};
+const COST_TOLERANCE_QUESTIONS = {
+  researchAnalysis: [["如果这一方向需要长期学习、反复验证，并且成果回报较慢，你的接受程度如何？", "If this direction requires long-term learning, repeated validation, and slow returns, how acceptable is that?"]],
+  businessManagement: [["如果这一方向需要持续沟通、承担指标压力和推进他人，你的接受程度如何？", "If this direction requires constant communication, target pressure, and pushing others forward, how acceptable is that?"]],
+  creativeContent: [["如果这一方向需要公开展示作品、接受评价，并且短期收益不稳定，你的接受程度如何？", "If this direction requires publicly showing work, accepting feedback, and unstable short-term returns, how acceptable is that?"]],
+  handsOnSkill: [["如果这一方向需要长期重复练习、动手操作和承受现场环境压力，你的接受程度如何？", "If this direction requires repeated practice, hands-on work, and field pressure, how acceptable is that?"]],
+  careService: [["如果这一方向需要长期面对他人的情绪、身体问题和重复性需求，你的接受程度如何？", "If this direction requires facing others' emotions, physical issues, and repetitive needs long-term, how acceptable is that?"]],
+  sportsEsports: [["如果这一方向竞争激烈、淘汰率高，并需要长期训练或高强度投入，你的接受程度如何？", "If this direction is highly competitive, has high elimination rates, and requires long training or intense input, how acceptable is that?"]],
+  stabilityRule: [["如果这一方向需要长期遵守规则、备考或制度化晋升，你的接受程度如何？", "If this direction requires following rules, exam prep, or institutional promotion long-term, how acceptable is that?"]]
+};
 const HANDS_ON_OPTIONS = [
   { labelZh: "烹饪、烘焙、饮品、餐饮制作", labelEn: "Cooking, baking, drinks, and food production", value: "food", scoreMap: { foodCraftPreference: 1, Realistic: 0.5, handsOnPreference: 0.8, physicalPreference: 0.5 } },
   { labelZh: "机械、维修、电路、工具操作", labelEn: "Machines, repair, circuits, and tools", value: "mechanical", scoreMap: { mechanicalPreference: 1, Realistic: 0.8, handsOnPreference: 1, physicalPreference: 0.7 } },
@@ -684,6 +794,9 @@ let answers = state.answers || {};
 let mbtiSelf = state.mbtiSelf || "未知";
 let adaptiveTake = [];
 let followupTake = [];
+let careerRoleTake = [];
+let careerDetailTake = [];
+let costToleranceTake = [];
 let currentSet = [];
 let currentStage = "";
 let index = 0;
@@ -808,7 +921,7 @@ function renderQuestion() {
   document.getElementById("surveyTitle").textContent = UI[lang].surveyTitle(currentStage);
   document.getElementById("progressText").textContent = `${index + 1} / ${currentSet.length}`;
   document.getElementById("progressBar").style.width = `${Math.round((index / currentSet.length) * 100)}%`;
-  document.getElementById("questionText").textContent = q[2];
+  document.getElementById("questionText").textContent = lang === "zh" ? q[2] : (q[7] || q[2]);
   const opt = document.getElementById("options");
   opt.innerHTML = "";
   if (Array.isArray(optionList)) {
@@ -841,10 +954,28 @@ function renderQuestion() {
     opt.appendChild(b);
   }
   }
-  document.getElementById("nextBtn").textContent = index === currentSet.length - 1 ? (currentStage === "skills" ? UI[lang].finish : UI[lang].nextStage) : UI[lang].next;
+  document.getElementById("nextBtn").textContent = nextButtonLabel();
   document.getElementById("nextBtn").disabled = answers[q[0]] == null;
   document.getElementById("prevBtn").textContent = UI[lang].back;
   document.getElementById("prevBtn").disabled = index === 0;
+}
+
+function nextButtonLabel() {
+  if (index < currentSet.length - 1) return UI[lang].next;
+  if (currentStage === "costTolerance") return UI[lang].finish;
+  if (currentStage === "skills") {
+    const previewProfile = buildProfile(buildScores(), mbtiSelf);
+    return buildCareerRoleQuestions(previewProfile).length ? UI[lang].nextStage : UI[lang].finish;
+  }
+  if (currentStage === "careerRole") {
+    const previewProfile = buildProfile(buildScores(), mbtiSelf);
+    return buildCareerDetailQuestions(previewProfile).length || buildCostToleranceQuestions(previewProfile).length ? UI[lang].nextStage : UI[lang].finish;
+  }
+  if (currentStage === "careerDetail") {
+    const previewProfile = buildProfile(buildScores(), mbtiSelf);
+    return buildCostToleranceQuestions(previewProfile).length ? UI[lang].nextStage : UI[lang].finish;
+  }
+  return UI[lang].nextStage;
 }
 
 function weightedScores(qs) {
@@ -1026,6 +1157,204 @@ function buildFollowUpQuestions(profile) {
   return selectedModules.flatMap(moduleName => followUpQuestionModules[moduleName]).slice(0, 8);
 }
 
+
+const fieldSignals = {
+  researchAnalysis: {
+    interestKeys: ["analysisPreference", "dataPreference", "researchAnalysis"],
+    abilityKeys: ["Investigative", "logic", "DeepWork", "Openness"]
+  },
+  businessManagement: {
+    interestKeys: ["businessAnalysisPreference", "communicationPreference"],
+    abilityKeys: ["Enterprising", "Leadership", "Extraversion", "Execution"]
+  },
+  creativeContent: {
+    interestKeys: ["writingContentPreference", "contentCreation", "visualCraftPreference"],
+    abilityKeys: ["Artistic", "Creativity", "Openness", "expression"]
+  },
+  handsOnSkill: {
+    interestKeys: ["handsOnPreference", "foodCraftPreference", "mechanicalPreference", "natureAnimalPreference"],
+    abilityKeys: ["Realistic", "Execution", "physicalPreference"]
+  },
+  careService: {
+    interestKeys: ["careServicePreference"],
+    abilityKeys: ["Social", "Agreeableness", "cooperation"]
+  },
+  sportsEsports: {
+    interestKeys: ["sportPerformancePreference", "esportsPreference", "gameInterest"],
+    abilityKeys: ["competitionPreference", "RiskTolerance", "physicalPreference"]
+  },
+  stabilityRule: {
+    interestKeys: ["examStabilityPreference"],
+    abilityKeys: ["Conventional", "Conscientiousness", "stabilityPreference"]
+  }
+};
+
+function getProfileValue(profile, key) {
+  return normalizeScore(
+    profile.deepPreferences?.[key] ??
+    profile.preferences?.[key] ??
+    profile.riasec?.[key] ??
+    profile.bigFive?.[key] ??
+    profile.workStyle?.[key] ??
+    profile.skills?.[key] ??
+    profile.values?.[key] ??
+    0
+  );
+}
+
+function calcFieldScore(profile, keys) {
+  if (!keys || keys.length === 0) return 0;
+  const values = keys
+    .map(key => getProfileValue(profile, key))
+    .filter(v => typeof v === "number" && !Number.isNaN(v));
+  if (!values.length) return 0;
+  return Math.max(...values);
+}
+
+function getTriggeredCareerFields(profile) {
+  const triggered = [];
+  Object.entries(fieldSignals).forEach(([field, signal]) => {
+    const interestScore = calcFieldScore(profile, signal.interestKeys);
+    const abilityScore = calcFieldScore(profile, signal.abilityKeys);
+    if (interestScore > 0.68 || abilityScore > 0.75) {
+      triggered.push({
+        field,
+        interestScore,
+        abilityScore,
+        triggerReason: interestScore > 0.68 ? "interest" : "ability"
+      });
+    }
+  });
+  return triggered
+    .sort((a, b) => Math.max(b.interestScore, b.abilityScore) - Math.max(a.interestScore, a.abilityScore))
+    .slice(0, 3);
+}
+
+function triggeredCareerFields(profile) {
+  return getTriggeredCareerFields(profile).map(item => item.field);
+}
+
+function roleQuestionId(field) {
+  return "career_role_" + field;
+}
+
+function detailQuestionId(field) {
+  return "career_detail_" + field;
+}
+
+function costQuestionId(field, index) {
+  return "cost_tolerance_" + field + "_" + (index + 1);
+}
+
+function selectedRoleScore(field) {
+  const value = answers[roleQuestionId(field)];
+  return ROLE_OPTIONS.find(option => option.value === value)?.score ?? 0.5;
+}
+
+function selectedCareerFieldsForDetail(profile) {
+  return triggeredCareerFields(profile).filter(field => {
+    const roleValue = answers[roleQuestionId(field)];
+    return roleValue && roleValue !== "hobby";
+  });
+}
+
+function buildCareerRoleQuestions(profile) {
+  return getTriggeredCareerFields(profile).map(item => {
+    const label = CAREER_FIELD_LABELS[item.field];
+    const reasonEn = item.triggerReason === "interest" ? "interest signal" : "ability fit";
+    return [
+      roleQuestionId(item.field),
+      "careerRole",
+      "从你的回答来看，你在【" + label.zh + "】方面表现出一定倾向。未来你更希望它在你的人生中扮演什么角色？",
+      item.field,
+      "CareerRole",
+      false,
+      ROLE_OPTIONS.map(option => ({
+        labelZh: option.labelZh,
+        labelEn: option.labelEn,
+        value: option.value,
+        scoreMap: {}
+      })),
+      "Your answers show a " + reasonEn + " in " + label.en + ". What role would you prefer it to play in your life?"
+    ];
+  });
+}
+
+function buildCareerDetailQuestions(profile) {
+  return selectedCareerFieldsForDetail(profile).map(field => {
+    const config = CAREER_DETAIL_QUESTIONS[field];
+    return [
+      detailQuestionId(field),
+      "careerDetail",
+      config[0],
+      field,
+      "CareerDetail",
+      false,
+      config[2],
+      config[1]
+    ];
+  });
+}
+
+function buildCostToleranceQuestions(profile) {
+  return selectedCareerFieldsForDetail(profile).flatMap(field => {
+    return (COST_TOLERANCE_QUESTIONS[field] || []).slice(0, 2).map((texts, i) => [
+      costQuestionId(field, i),
+      "costTolerance",
+      texts[0],
+      field,
+      "CostTolerance",
+      false,
+      null,
+      texts[1]
+    ]);
+  });
+}
+
+function calculateCareerRolePreference(profile) {
+  const result = { ...DEFAULT_FIELD_SCORES };
+  triggeredCareerFields(profile).forEach(field => {
+    result[field] = selectedRoleScore(field);
+  });
+  return result;
+}
+
+function calculateCostTolerance(profile) {
+  const result = { ...DEFAULT_FIELD_SCORES };
+  triggeredCareerFields(profile).forEach(field => {
+    if (answers[roleQuestionId(field)] === "hobby") return;
+    const qs = (COST_TOLERANCE_QUESTIONS[field] || []).slice(0, 2).map((_, i) => [
+      costQuestionId(field, i),
+      "costTolerance",
+      "",
+      field,
+      "CostTolerance",
+      false
+    ]);
+    const score = avgScore(qs, field);
+    result[field] = score ? score / 100 : 0.5;
+  });
+  return result;
+}
+
+function mapCareerFieldToBroadField(careerField) {
+  const map = {
+    gameEsports: "sportsEsports",
+    sportPerformance: "sportsEsports",
+    writingContent: "creativeContent",
+    visualDesign: "creativeContent",
+    foodCraft: "handsOnSkill",
+    mechanical: "handsOnSkill",
+    careService: "careService",
+    researchAnalysis: "researchAnalysis",
+    internetTech: "researchAnalysis",
+    businessManagement: "businessManagement",
+    publicService: "stabilityRule",
+    stabilityRule: "stabilityRule"
+  };
+  return map[careerField] || careerField || "researchAnalysis";
+}
+
 function startSurvey() {
   document.getElementById("mbtiShell").classList.remove("hidden");
   document.getElementById("surveyShell").classList.add("hidden");
@@ -1041,6 +1370,9 @@ function confirmMBTI() {
   answers = state.answers || {};
   adaptiveTake = [];
   followupTake = [];
+  careerRoleTake = [];
+  careerDetailTake = [];
+  costToleranceTake = [];
   currentSet = questions.filter(q => q[1] === "basic");
   currentStage = "basic";
   index = 0;
@@ -1116,6 +1448,57 @@ function nextQ() {
     return;
   }
   if (currentStage === "skills") {
+    const preProfile = buildProfile(buildScores(), mbtiSelf);
+    careerRoleTake = buildCareerRoleQuestions(preProfile);
+    if (careerRoleTake.length) {
+      validateQuestionBank(careerRoleTake);
+      currentSet = careerRoleTake;
+      currentStage = "careerRole";
+      index = 0;
+      renderQuestion();
+      return;
+    }
+    finish();
+    return;
+  }
+  if (currentStage === "careerRole") {
+    const preProfile = buildProfile(buildScores(), mbtiSelf);
+    careerDetailTake = buildCareerDetailQuestions(preProfile);
+    if (careerDetailTake.length) {
+      validateQuestionBank(careerDetailTake);
+      currentSet = careerDetailTake;
+      currentStage = "careerDetail";
+      index = 0;
+      renderQuestion();
+      return;
+    }
+    costToleranceTake = buildCostToleranceQuestions(preProfile);
+    if (costToleranceTake.length) {
+      validateQuestionBank(costToleranceTake);
+      currentSet = costToleranceTake;
+      currentStage = "costTolerance";
+      index = 0;
+      renderQuestion();
+      return;
+    }
+    finish();
+    return;
+  }
+  if (currentStage === "careerDetail") {
+    const preProfile = buildProfile(buildScores(), mbtiSelf);
+    costToleranceTake = buildCostToleranceQuestions(preProfile);
+    if (costToleranceTake.length) {
+      validateQuestionBank(costToleranceTake);
+      currentSet = costToleranceTake;
+      currentStage = "costTolerance";
+      index = 0;
+      renderQuestion();
+      return;
+    }
+    finish();
+    return;
+  }
+  if (currentStage === "costTolerance") {
     finish();
   }
 }
@@ -1282,7 +1665,7 @@ function mismatchPenalty(userScores, careerWeights, penalty = 0.12) {
 }
 
 function buildProfile(scores, userMbti) {
-  return {
+  const baseProfile = {
     userMbti: userMbti || "unknown",
     inferredMbti: inferMBTI(scores.mbti),
     mbti: inferMBTI(scores.mbti),
@@ -1301,6 +1684,9 @@ function buildProfile(scores, userMbti) {
     preferences: scores.preferences,
     deepPreferences: scores.deepPreferences || {}
   };
+  baseProfile.careerRolePreference = calculateCareerRolePreference(baseProfile);
+  baseProfile.costTolerance = calculateCostTolerance(baseProfile);
+  return baseProfile;
 }
 
 function makeCareer(titleZh, titleEn, categoryZh, categoryEn, descriptionZh, descriptionEn, data) {
@@ -1316,6 +1702,7 @@ function makeCareer(titleZh, titleEn, categoryZh, categoryEn, descriptionZh, des
     skills: data.skills || {},
     preferences: data.preferences || {},
     deepPreferences: data.deepPreferences || {},
+    careerField: data.careerField || "skillGeneral",
     physicalDemand: data.physicalDemand ?? 0.5,
     educationRequirement: data.educationRequirement ?? 0.5,
     riskLevel: data.riskLevel ?? 0.5,
@@ -1325,7 +1712,7 @@ function makeCareer(titleZh, titleEn, categoryZh, categoryEn, descriptionZh, des
 
 const careerProfiles = [
   makeCareer("互联网行业开发与数据方向", "Internet Development and Data", "技术研发类", "Internet Development and Data", "该方向包含软件开发、算法、数据分析、数据工程等细分岗位，适合逻辑能力强、研究型兴趣高、能长期学习技术的人。", "This direction covers software development, algorithms, data analysis, and data engineering. It suits people with strong logic, investigative interests, and long-term learning capacity.", {
-    groupZh: "互联网开发与数据类", groupEn: "Internet Development and Data",
+    careerField: "internetTech", groupZh: "互联网开发与数据类", groupEn: "Internet Development and Data",
     mbti: ["INTJ","INTP","ISTJ","ISTP"], riasec: { Investigative: 0.98, Conventional: 0.72 }, bigFive: { Conscientiousness: 0.84, Openness: 0.74 },
     values: { Wealth: 0.72, Achievement: 0.82, Freedom: 0.55 }, workStyle: { DeepWork: 0.95, Execution: 0.8 }, skills: { logic: 0.98, learning: 0.9 },
     preferences: { physicalPreference: 0.1, stabilityPreference: 0.48, riskTolerance: 0.34, competitionPreference: 0.32, gameInterest: 0.12, outdoorPreference: 0.08, handsOnPreference: 0.35 },
@@ -1333,7 +1720,7 @@ const careerProfiles = [
     physicalDemand: 0.06, educationRequirement: 0.84, riskLevel: 0.3, stabilityLevel: 0.56
   }),
   makeCareer("产品经理 / AI产品经理", "Product Manager / AI Product Manager", "商业管理类", "Business", "适合协调需求、技术和结果推进。", "For coordinating needs, tech, and delivery.", {
-    groupZh: "产品与运营类", groupEn: "Product and Operations",
+    careerField: "businessManagement", groupZh: "产品与运营类", groupEn: "Product and Operations",
     mbti: ["ENTJ","ENFJ","ENTP","INTJ"], riasec: { Enterprising: 0.9, Social: 0.62, Investigative: 0.58 }, bigFive: { Extraversion: 0.72, Conscientiousness: 0.72, Openness: 0.72 },
     values: { Influence: 0.82, Achievement: 0.88, Wealth: 0.72 }, workStyle: { Leadership: 0.82, Collaboration: 0.7, Execution: 0.78 }, skills: { logic: 0.8, expression: 0.82, cooperation: 0.72 },
     preferences: { physicalPreference: 0.1, stabilityPreference: 0.35, riskTolerance: 0.55, competitionPreference: 0.55, gameInterest: 0.15, outdoorPreference: 0.1, handsOnPreference: 0.3 },
@@ -1341,7 +1728,7 @@ const careerProfiles = [
     physicalDemand: 0.05, educationRequirement: 0.78, riskLevel: 0.5, stabilityLevel: 0.4
   }),
   makeCareer("测试与质量保障工程师", "QA / Test Engineer", "技术研发类", "Quality Assurance", "适合细致、流程意识强和喜欢发现问题的人。", "For detail-oriented people who enjoy process and finding issues.", {
-    groupZh: "互联网开发与数据类", groupEn: "Internet Development and Data",
+    careerField: "internetTech", groupZh: "互联网开发与数据类", groupEn: "Internet Development and Data",
     mbti: ["ISTJ","INTJ","ISFJ"], riasec: { Conventional: 0.88, Investigative: 0.72 }, bigFive: { Conscientiousness: 0.88, Openness: 0.45 },
     values: { Stability: 0.62, Achievement: 0.7 }, workStyle: { Execution: 0.88, DeepWork: 0.72 }, skills: { logic: 0.78, learning: 0.72 },
     preferences: { physicalPreference: 0.1, stabilityPreference: 0.62, riskTolerance: 0.28, competitionPreference: 0.2, gameInterest: 0.08, outdoorPreference: 0.06, handsOnPreference: 0.4 },
@@ -1349,7 +1736,7 @@ const careerProfiles = [
     physicalDemand: 0.05, educationRequirement: 0.62, riskLevel: 0.25, stabilityLevel: 0.58
   }),
   makeCareer("网络安全工程师", "Cybersecurity Engineer", "技术研发类", "Cybersecurity", "适合重逻辑、重规则、能持续关注风险的人。", "For logic-heavy, rule-aware people who can track risk.", {
-    groupZh: "互联网开发与数据类", groupEn: "Internet Development and Data",
+    careerField: "internetTech", groupZh: "互联网开发与数据类", groupEn: "Internet Development and Data",
     mbti: ["INTJ","ISTJ","INTP"], riasec: { Investigative: 0.92, Conventional: 0.78 }, bigFive: { Conscientiousness: 0.84, Neuroticism: 0.35 },
     values: { Stability: 0.58, Achievement: 0.72 }, workStyle: { DeepWork: 0.9, Execution: 0.76 }, skills: { logic: 0.96, learning: 0.86 },
     preferences: { physicalPreference: 0.08, stabilityPreference: 0.56, riskTolerance: 0.3, competitionPreference: 0.22, gameInterest: 0.08, outdoorPreference: 0.04, handsOnPreference: 0.28 },
@@ -1357,7 +1744,7 @@ const careerProfiles = [
     physicalDemand: 0.04, educationRequirement: 0.78, riskLevel: 0.28, stabilityLevel: 0.52
   }),
   makeCareer("游戏策划", "Game Designer", "创意内容类", "Creative", "适合理解玩家心理、构建规则与内容设计。", "For player psychology, rules, and content design.", {
-    groupZh: "产品与运营类", groupEn: "Product and Operations",
+    careerField: "gameEsports", groupZh: "产品与运营类", groupEn: "Product and Operations",
     mbti: ["ENTP","ENFP","INTP","INFJ"], riasec: { Artistic: 0.72, Enterprising: 0.7, Investigative: 0.58 }, bigFive: { Openness: 0.9, Extraversion: 0.5 },
     values: { Freedom: 0.7, Achievement: 0.68, Influence: 0.55 }, workStyle: { Creativity: 0.9, Collaboration: 0.68 }, skills: { creativity: 0.88, logic: 0.62, expression: 0.6 },
     preferences: { physicalPreference: 0.08, stabilityPreference: 0.32, riskTolerance: 0.42, competitionPreference: 0.6, gameInterest: 0.92, outdoorPreference: 0.1, handsOnPreference: 0.32 },
@@ -1365,7 +1752,7 @@ const careerProfiles = [
     physicalDemand: 0.05, educationRequirement: 0.55, riskLevel: 0.45, stabilityLevel: 0.28
   }),
   makeCareer("UI / 交互设计师", "UI / UX Designer", "创意内容类", "Design", "适合审美敏感、愿意打磨视觉与交互的人。", "For visually sensitive people who enjoy refining interfaces.", {
-    groupZh: "创意内容与设计类", groupEn: "Creative Content and Design",
+    careerField: "visualDesign", groupZh: "创意内容与设计类", groupEn: "Creative Content and Design",
     mbti: ["INFP","INTP","ENFP","ISFP"], riasec: { Artistic: 0.96, Investigative: 0.42 }, bigFive: { Openness: 0.92, Conscientiousness: 0.68 },
     values: { Freedom: 0.82, Achievement: 0.62 }, workStyle: { Creativity: 0.92, DeepWork: 0.74 }, skills: { creativity: 0.96, expression: 0.6 },
     preferences: { physicalPreference: 0.06, stabilityPreference: 0.28, riskTolerance: 0.34, competitionPreference: 0.25, gameInterest: 0.12, outdoorPreference: 0.08, handsOnPreference: 0.52 },
@@ -1373,7 +1760,7 @@ const careerProfiles = [
     physicalDemand: 0.04, educationRequirement: 0.55, riskLevel: 0.36, stabilityLevel: 0.3
   }),
   makeCareer("运营专员 / 新媒体运营", "Operations Specialist / Social Media Operations", "商业管理类", "Operations", "适合内容、传播、节奏推进和用户互动。", "For content, communication, pacing, and user engagement.", {
-    groupZh: "产品与运营类", groupEn: "Product and Operations",
+    careerField: "businessManagement", groupZh: "产品与运营类", groupEn: "Product and Operations",
     mbti: ["ENFP","ESFP","ENTP","ISFJ"], riasec: { Enterprising: 0.7, Social: 0.7, Artistic: 0.55 }, bigFive: { Extraversion: 0.68, Openness: 0.72 },
     values: { Influence: 0.72, Freedom: 0.62, Wealth: 0.55 }, workStyle: { Collaboration: 0.74, Execution: 0.68 }, skills: { expression: 0.82, creativity: 0.7, cooperation: 0.72 },
     preferences: { physicalPreference: 0.08, stabilityPreference: 0.3, riskTolerance: 0.4, competitionPreference: 0.5, gameInterest: 0.22, outdoorPreference: 0.15, handsOnPreference: 0.25 },
@@ -1381,7 +1768,7 @@ const careerProfiles = [
     physicalDemand: 0.05, educationRequirement: 0.45, riskLevel: 0.42, stabilityLevel: 0.3
   }),
   makeCareer("咨询顾问", "Consultant", "商业管理类", "Business", "适合拆解问题、说服和推动变化。", "For problem solving, persuasion, and change.", {
-    groupZh: "商业管理与销售类", groupEn: "Business and Sales",
+    careerField: "businessManagement", groupZh: "商业管理与销售类", groupEn: "Business and Sales",
     mbti: ["ENTJ","ENFJ","ENTP","INTJ"], riasec: { Enterprising: 0.92, Social: 0.75, Investigative: 0.68 }, bigFive: { Extraversion: 0.82, Openness: 0.78 },
     values: { Influence: 0.9, Achievement: 0.84, Wealth: 0.72 }, workStyle: { Leadership: 0.78, Collaboration: 0.68, Execution: 0.7 }, skills: { logic: 0.8, expression: 0.9, learning: 0.82 },
     preferences: { physicalPreference: 0.1, stabilityPreference: 0.3, riskTolerance: 0.58, competitionPreference: 0.6, gameInterest: 0.12, outdoorPreference: 0.12, handsOnPreference: 0.22 },
@@ -1389,73 +1776,73 @@ const careerProfiles = [
     physicalDemand: 0.08, educationRequirement: 0.78, riskLevel: 0.58, stabilityLevel: 0.35
   }),
   makeCareer("公务员", "Civil Servant", "公共服务类", "Public Service", "适合重规则、重责任和稳定的人。", "For rules, responsibility, and stability.", {
-    groupZh: "公共服务与稳定职业类", groupEn: "Public and Stable Roles",
+    careerField: "publicService", groupZh: "公共服务与稳定职业类", groupEn: "Public and Stable Roles",
     mbti: ["ISTJ","ISFJ","ESTJ","INFJ"], riasec: { Conventional: 0.96, Social: 0.45 }, bigFive: { Conscientiousness: 0.9, Neuroticism: 0.28 },
     values: { Stability: 0.98, SocialImpact: 0.72, WorkLifeBalance: 0.7 }, workStyle: { Execution: 0.88, Collaboration: 0.62 }, skills: { logic: 0.72, execution: 0.9, cooperation: 0.65 },
     preferences: { physicalPreference: 0.12, stabilityPreference: 0.98, riskTolerance: 0.15, competitionPreference: 0.25, gameInterest: 0.05, outdoorPreference: 0.08, handsOnPreference: 0.2 },
     physicalDemand: 0.08, educationRequirement: 0.72, riskLevel: 0.12, stabilityLevel: 0.95
   }),
   makeCareer("护士", "Nurse", "医疗健康类", "Healthcare", "适合关怀他人并能接受轮班。", "For caring for others and shift work.", {
-    groupZh: "医疗健康与照护类", groupEn: "Healthcare and Care",
+    careerField: "careService", groupZh: "医疗健康与照护类", groupEn: "Healthcare and Care",
     mbti: ["ISFJ","INFJ","ESFJ","ISTJ"], riasec: { Social: 0.94, Conventional: 0.7 }, bigFive: { Agreeableness: 0.92, Conscientiousness: 0.88 },
     values: { SocialImpact: 0.9, Stability: 0.8 }, workStyle: { Collaboration: 0.92, Execution: 0.9 }, skills: { expression: 0.62, cooperation: 0.9 },
     preferences: { physicalPreference: 0.55, stabilityPreference: 0.82, riskTolerance: 0.28, competitionPreference: 0.2, gameInterest: 0.05, outdoorPreference: 0.2, handsOnPreference: 0.72 },
     physicalDemand: 0.62, educationRequirement: 0.72, riskLevel: 0.28, stabilityLevel: 0.82
   }),
   makeCareer("编剧", "Screenwriter", "创意内容类", "Creative", "适合长期创作、表达和打磨文本。", "For long-form creation, expression, and writing.", {
-    groupZh: "创意内容与写作类", groupEn: "Creative Writing and Content",
+    careerField: "writingContent", groupZh: "创意内容与写作类", groupEn: "Creative Writing and Content",
     mbti: ["INFP","INFJ","ENFP","INTJ"], riasec: { Artistic: 1, Investigative: 0.4 }, bigFive: { Openness: 0.98, Extraversion: 0.32 },
     values: { Freedom: 0.85, Achievement: 0.62 }, workStyle: { DeepWork: 0.82, Creativity: 1 }, skills: { expression: 0.9, creativity: 1, learning: 0.75 },
     preferences: { physicalPreference: 0.1, stabilityPreference: 0.25, riskTolerance: 0.42, competitionPreference: 0.22, gameInterest: 0.15, outdoorPreference: 0.12, handsOnPreference: 0.25 },
     physicalDemand: 0.05, educationRequirement: 0.65, riskLevel: 0.45, stabilityLevel: 0.32
   }),
   makeCareer("设计师", "Designer", "创意内容类", "Creative", "适合创意表达、视觉审美和方案设计。", "For creative expression, visual taste, and design.", {
-    groupZh: "视觉设计与手作类", groupEn: "Visual Design and Craft",
+    careerField: "visualDesign", groupZh: "视觉设计与手作类", groupEn: "Visual Design and Craft",
     mbti: ["INFP","INTP","ENFP","ISFP"], riasec: { Artistic: 0.98, Investigative: 0.35 }, bigFive: { Openness: 0.95, Extraversion: 0.35 },
     values: { Freedom: 0.8, Achievement: 0.65 }, workStyle: { Creativity: 1, DeepWork: 0.7 }, skills: { creativity: 1, expression: 0.68 },
     preferences: { physicalPreference: 0.08, stabilityPreference: 0.32, riskTolerance: 0.4, competitionPreference: 0.3, gameInterest: 0.1, outdoorPreference: 0.1, handsOnPreference: 0.5 },
     physicalDemand: 0.05, educationRequirement: 0.62, riskLevel: 0.42, stabilityLevel: 0.38
   }),
   makeCareer("电工", "Electrician", "技能体力类", "Skilled Trades", "适合动手操作、现场解决问题。", "For hands-on, field problem solving.", {
-    groupZh: "技能实操与现场工作类", groupEn: "Skilled Hands-on Field Work",
+    careerField: "mechanical", groupZh: "技能实操与现场工作类", groupEn: "Skilled Hands-on Field Work",
     mbti: ["ISTP","ESTP","ISFP"], riasec: { Realistic: 0.98, Conventional: 0.45 }, bigFive: { Extraversion: 0.38, Conscientiousness: 0.72 },
     values: { Stability: 0.55, Wealth: 0.58 }, workStyle: { Execution: 0.92, RiskTolerance: 0.55 }, skills: { execution: 0.92, logic: 0.62 },
     preferences: { physicalPreference: 0.95, handsOnPreference: 0.98, outdoorPreference: 0.9, stabilityPreference: 0.45, riskTolerance: 0.55, competitionPreference: 0.4, gameInterest: 0.05 },
     physicalDemand: 0.98, educationRequirement: 0.35, riskLevel: 0.48, stabilityLevel: 0.5
   }),
   makeCareer("厨师", "Chef", "技能体力类", "Skilled Trades", "适合高强度节奏、动手和技能打磨。", "For fast-paced hands-on skill practice.", {
-    groupZh: "餐饮手作类", groupEn: "Food Craft",
+    careerField: "foodCraft", groupZh: "餐饮手作类", groupEn: "Food Craft",
     mbti: ["ESTP","ESFP","ISFP","ISTP"], riasec: { Realistic: 0.82, Artistic: 0.4, Conventional: 0.45 }, bigFive: { Extraversion: 0.45, Conscientiousness: 0.72 },
     values: { Wealth: 0.55, Achievement: 0.65 }, workStyle: { Execution: 0.9, Creativity: 0.55 }, skills: { execution: 0.88, creativity: 0.55 },
     preferences: { physicalPreference: 0.86, handsOnPreference: 0.9, competitionPreference: 0.45, stabilityPreference: 0.5, riskTolerance: 0.45, gameInterest: 0.05, outdoorPreference: 0.2 },
     physicalDemand: 0.9, educationRequirement: 0.4, riskLevel: 0.48, stabilityLevel: 0.5
   }),
   makeCareer("职业运动员", "Professional Athlete", "体育娱乐类", "Sports & Entertainment", "适合高训练、高竞争和高体能消耗。", "For intense training, competition, and physical demand.", {
-    mbti: ["ESTP","ESFP","ISTP"], riasec: { Realistic: 0.98, Enterprising: 0.45 }, bigFive: { Extraversion: 0.78, Conscientiousness: 0.78 },
+    careerField: "sportPerformance", mbti: ["ESTP","ESFP","ISTP"], riasec: { Realistic: 0.98, Enterprising: 0.45 }, bigFive: { Extraversion: 0.78, Conscientiousness: 0.78 },
     values: { Achievement: 0.95, Influence: 0.65, Stability: 0.2 }, workStyle: { Execution: 0.95, RiskTolerance: 0.82, Leadership: 0.55 }, skills: { execution: 0.95, learning: 0.68 },
     preferences: { physicalPreference: 1, competitionPreference: 1, riskTolerance: 0.9, outdoorPreference: 0.95, stabilityPreference: 0.15, gameInterest: 0.2, handsOnPreference: 0.8 },
     physicalDemand: 1, educationRequirement: 0.35, riskLevel: 0.9, stabilityLevel: 0.15
   }),
   makeCareer("电竞职业选手", "Esports Player", "体育娱乐类", "Sports & Entertainment", "适合游戏兴趣强、竞争意识强的人。", "For strong game interest and competitiveness.", {
-    mbti: ["ESTP","ENTP","ESFP","INTP"], riasec: { Enterprising: 0.5, Realistic: 0.35 }, bigFive: { Extraversion: 0.62, Conscientiousness: 0.7 },
+    careerField: "gameEsports", mbti: ["ESTP","ENTP","ESFP","INTP"], riasec: { Enterprising: 0.5, Realistic: 0.35 }, bigFive: { Extraversion: 0.62, Conscientiousness: 0.7 },
     values: { Achievement: 0.95, Wealth: 0.7, Stability: 0.15 }, workStyle: { Execution: 0.95, RiskTolerance: 0.92 }, skills: { execution: 0.95, learning: 0.72 },
     preferences: { gameInterest: 1, competitionPreference: 1, riskTolerance: 0.95, physicalPreference: 0.45, stabilityPreference: 0.1, outdoorPreference: 0.2, handsOnPreference: 0.55 },
     physicalDemand: 0.4, educationRequirement: 0.4, riskLevel: 0.95, stabilityLevel: 0.1
   }),
   makeCareer("自媒体博主", "Content Creator", "自由职业类", "Freelance", "适合独立表达、持续输出和流量运营。", "For independent expression, output, and traffic building.", {
-    mbti: ["ENFP","ENTP","ESFP","INFP"], riasec: { Artistic: 0.78, Enterprising: 0.8, Social: 0.6 }, bigFive: { Extraversion: 0.75, Openness: 0.85 },
+    careerField: "writingContent", mbti: ["ENFP","ENTP","ESFP","INFP"], riasec: { Artistic: 0.78, Enterprising: 0.8, Social: 0.6 }, bigFive: { Extraversion: 0.75, Openness: 0.85 },
     values: { Freedom: 0.9, Influence: 0.85, Wealth: 0.6 }, workStyle: { Creativity: 0.85, Leadership: 0.55 }, skills: { expression: 0.92, creativity: 0.9 },
     preferences: { riskTolerance: 0.7, stabilityPreference: 0.2, gameInterest: 0.35, physicalPreference: 0.1, competitionPreference: 0.55, outdoorPreference: 0.2, handsOnPreference: 0.25 },
     physicalDemand: 0.08, educationRequirement: 0.45, riskLevel: 0.72, stabilityLevel: 0.2
   }),
   makeCareer("创业者", "Entrepreneur", "自由职业类", "Freelance", "适合高风险、高自主和资源整合。", "For high risk, autonomy, and resource orchestration.", {
-    mbti: ["ENTJ","ENTP","ENFJ"], riasec: { Enterprising: 1, Social: 0.65, Investigative: 0.5 }, bigFive: { Extraversion: 0.8, Openness: 0.78 },
+    careerField: "businessManagement", mbti: ["ENTJ","ENTP","ENFJ"], riasec: { Enterprising: 1, Social: 0.65, Investigative: 0.5 }, bigFive: { Extraversion: 0.8, Openness: 0.78 },
     values: { Wealth: 0.78, Freedom: 0.92, Influence: 0.9, Achievement: 0.9 }, workStyle: { Leadership: 0.95, RiskTolerance: 0.95, Execution: 0.82 }, skills: { expression: 0.9, logic: 0.7, cooperation: 0.72 },
     preferences: { riskTolerance: 1, stabilityPreference: 0.05, competitionPreference: 0.9, gameInterest: 0.2, physicalPreference: 0.1, outdoorPreference: 0.1, handsOnPreference: 0.2 },
     physicalDemand: 0.1, educationRequirement: 0.6, riskLevel: 1, stabilityLevel: 0.05
   }),
   makeCareer("公务员 / 事业单位职员", "Civil Service / Public Institution Staff", "公共服务类", "Public Service", "适合稳定、规则清晰、长期执行和公共责任。", "For stable, rule-based, long-term public responsibility.", {
-    groupZh: "公共服务与稳定职业类", groupEn: "Public and Stable Roles",
+    careerField: "publicService", groupZh: "公共服务与稳定职业类", groupEn: "Public and Stable Roles",
     mbti: ["ISTJ","ISFJ","ESTJ"], riasec: { Conventional: 0.98, Social: 0.45 }, bigFive: { Conscientiousness: 0.95, Neuroticism: 0.25 },
     values: { Stability: 1, WorkLifeBalance: 0.78, SocialImpact: 0.62 }, workStyle: { Execution: 0.9, Collaboration: 0.65 }, skills: { execution: 0.9, cooperation: 0.65, logic: 0.65 },
     preferences: { stabilityPreference: 1, riskTolerance: 0.1, physicalPreference: 0.1, competitionPreference: 0.25, handsOnPreference: 0.2 },
@@ -1463,7 +1850,7 @@ const careerProfiles = [
     physicalDemand: 0.08, educationRequirement: 0.68, riskLevel: 0.1, stabilityLevel: 1
   }),
   makeCareer("银行柜员 / 财务审计", "Bank Teller / Finance and Audit", "公共服务类", "Finance and Audit", "适合细致、规则意识强、偏好稳定流程。", "For detail, rule awareness, and stable processes.", {
-    groupZh: "财务审计与规则类", groupEn: "Finance Audit and Compliance",
+    careerField: "publicService", groupZh: "财务审计与规则类", groupEn: "Finance Audit and Compliance",
     mbti: ["ISTJ","ISFJ","ESTJ"], riasec: { Conventional: 0.95, Investigative: 0.45 }, bigFive: { Conscientiousness: 0.94 },
     values: { Stability: 0.9, Wealth: 0.58 }, workStyle: { Execution: 0.92, DeepWork: 0.58 }, skills: { execution: 0.92, logic: 0.72 },
     preferences: { stabilityPreference: 0.92, riskTolerance: 0.18, physicalPreference: 0.05, handsOnPreference: 0.15 },
@@ -1471,7 +1858,7 @@ const careerProfiles = [
     physicalDemand: 0.05, educationRequirement: 0.62, riskLevel: 0.15, stabilityLevel: 0.9
   }),
   makeCareer("汽车维修技师 / 电工焊工", "Auto Mechanic / Electrician / Welder", "技能体力类", "Skilled Trades", "适合机械、电路、工具操作和现场问题解决。", "For mechanical, electrical, tool-based field problem solving.", {
-    groupZh: "技能实操与现场工作类", groupEn: "Skilled Hands-on Field Work",
+    careerField: "mechanical", groupZh: "技能实操与现场工作类", groupEn: "Skilled Hands-on Field Work",
     mbti: ["ISTP","ESTP","ISFP"], riasec: { Realistic: 1, Conventional: 0.42 }, bigFive: { Conscientiousness: 0.68 },
     values: { Wealth: 0.55, Stability: 0.52, Achievement: 0.58 }, workStyle: { Execution: 0.9, RiskTolerance: 0.48 }, skills: { execution: 0.9, logic: 0.62 },
     preferences: { physicalPreference: 0.95, handsOnPreference: 1, outdoorPreference: 0.75, riskTolerance: 0.48, stabilityPreference: 0.48 },
@@ -1479,7 +1866,7 @@ const careerProfiles = [
     physicalDemand: 0.9, educationRequirement: 0.35, riskLevel: 0.48, stabilityLevel: 0.52
   }),
   makeCareer("西点烘焙师 / 咖啡师", "Pastry Baker / Barista", "技能体力类", "Food Craft", "适合餐饮制作、手作审美和重复练习。", "For food craft, hands-on aesthetics, and repeated practice.", {
-    groupZh: "餐饮手作类", groupEn: "Food Craft",
+    careerField: "foodCraft", groupZh: "餐饮手作类", groupEn: "Food Craft",
     mbti: ["ISFP","ESFP","ISTP"], riasec: { Realistic: 0.75, Artistic: 0.62, Conventional: 0.45 }, bigFive: { Conscientiousness: 0.65, Openness: 0.55 },
     values: { Achievement: 0.62, Stability: 0.45 }, workStyle: { Execution: 0.86, Creativity: 0.62 }, skills: { execution: 0.86, creativity: 0.62 },
     preferences: { physicalPreference: 0.75, handsOnPreference: 0.95, stabilityPreference: 0.45, riskTolerance: 0.35 },
@@ -1487,7 +1874,7 @@ const careerProfiles = [
     physicalDemand: 0.72, educationRequirement: 0.32, riskLevel: 0.38, stabilityLevel: 0.45
   }),
   makeCareer("护士 / 康复治疗师 / 养老护理员", "Nurse / Rehab Therapist / Elder Care Worker", "医疗健康类", "Healthcare and Care", "适合照护、健康服务、稳定执行和具体需求处理。", "For care, health services, stable execution, and concrete needs.", {
-    groupZh: "医疗健康与照护类", groupEn: "Healthcare and Care",
+    careerField: "careService", groupZh: "医疗健康与照护类", groupEn: "Healthcare and Care",
     mbti: ["ISFJ","ESFJ","INFJ"], riasec: { Social: 0.94, Realistic: 0.55, Conventional: 0.62 }, bigFive: { Agreeableness: 0.92, Conscientiousness: 0.86 },
     values: { SocialImpact: 0.9, Stability: 0.78 }, workStyle: { Collaboration: 0.9, Execution: 0.9 }, skills: { cooperation: 0.9, execution: 0.86 },
     preferences: { physicalPreference: 0.58, handsOnPreference: 0.72, stabilityPreference: 0.76, riskTolerance: 0.25 },
@@ -1495,7 +1882,7 @@ const careerProfiles = [
     physicalDemand: 0.58, educationRequirement: 0.65, riskLevel: 0.28, stabilityLevel: 0.78
   }),
   makeCareer("编剧 / 自由撰稿人", "Screenwriter / Freelance Writer", "创意内容类", "Writing and Content", "适合写作、阅读、观点表达和长期内容打磨。", "For writing, reading, expressing ideas, and long-form content craft.", {
-    groupZh: "创意内容与写作类", groupEn: "Creative Writing and Content",
+    careerField: "writingContent", groupZh: "创意内容与写作类", groupEn: "Creative Writing and Content",
     mbti: ["INFP","INFJ","ENFP","INTJ"], riasec: { Artistic: 1, Investigative: 0.52 }, bigFive: { Openness: 0.96, Extraversion: 0.28 },
     values: { Freedom: 0.86, Achievement: 0.62 }, workStyle: { Creativity: 0.95, DeepWork: 0.86 }, skills: { creativity: 0.95, expression: 0.9, learning: 0.72 },
     preferences: { stabilityPreference: 0.25, riskTolerance: 0.45, physicalPreference: 0.05, handsOnPreference: 0.18 },
@@ -1503,7 +1890,7 @@ const careerProfiles = [
     physicalDemand: 0.04, educationRequirement: 0.55, riskLevel: 0.58, stabilityLevel: 0.25
   }),
   makeCareer("插画师 / 摄影师 / 服装设计师", "Illustrator / Photographer / Fashion Designer", "创意内容类", "Visual Creative", "适合视觉审美、图像表达、手作和作品集积累。", "For visual aesthetics, image expression, craft, and portfolio building.", {
-    groupZh: "视觉设计与手作类", groupEn: "Visual Design and Craft",
+    careerField: "visualDesign", groupZh: "视觉设计与手作类", groupEn: "Visual Design and Craft",
     mbti: ["ISFP","INFP","ENFP"], riasec: { Artistic: 1, Realistic: 0.35 }, bigFive: { Openness: 0.92 },
     values: { Freedom: 0.78, Achievement: 0.6 }, workStyle: { Creativity: 0.96, DeepWork: 0.62 }, skills: { creativity: 0.96, expression: 0.55 },
     preferences: { handsOnPreference: 0.55, physicalPreference: 0.25, riskTolerance: 0.42, stabilityPreference: 0.25 },
@@ -1511,7 +1898,7 @@ const careerProfiles = [
     physicalDemand: 0.22, educationRequirement: 0.45, riskLevel: 0.48, stabilityLevel: 0.25
   }),
   makeCareer("电竞教练 / 游戏主播 / 赛事运营", "Esports Coach / Game Streamer / Event Operations", "体育娱乐类", "Esports and Events", "适合游戏兴趣、竞争偏好、表达或赛事执行。", "For gaming interest, competition, expression, or event execution.", {
-    groupZh: "体育电竞与表演类", groupEn: "Sports Esports and Performance",
+    careerField: "gameEsports", groupZh: "体育电竞与表演类", groupEn: "Sports Esports and Performance",
     mbti: ["ENTP","ESTP","ESFP","INTP"], riasec: { Enterprising: 0.72, Realistic: 0.35, Social: 0.55 }, bigFive: { Extraversion: 0.65, Openness: 0.72 },
     values: { Achievement: 0.9, Influence: 0.72, Stability: 0.12 }, workStyle: { Execution: 0.86, RiskTolerance: 0.9, Creativity: 0.58 }, skills: { execution: 0.86, expression: 0.72, learning: 0.72 },
     preferences: { gameInterest: 1, competitionPreference: 0.95, riskTolerance: 0.9, stabilityPreference: 0.12, physicalPreference: 0.25 },
@@ -1520,27 +1907,34 @@ const careerProfiles = [
   })
 ];
 
-function dedupeCareerMatches(matches) {
+function dedupeCareerMatches(matches, options = {}) {
   const sorted = [...matches].sort((a, b) => {
     const scoreA = typeof a.rawScore === "number" ? a.rawScore : a.score || 0;
     const scoreB = typeof b.rawScore === "number" ? b.rawScore : b.score || 0;
     return scoreB - scoreA;
   });
 
-  const usedGroups = new Set();
-  const result = [];
-
-  for (const item of sorted) {
-    const group = item.groupZh || item.categoryZh || item.titleZh || "未分类";
-
-    if (!usedGroups.has(group)) {
-      result.push(item);
-      usedGroups.add(group);
+  const build = (pool, initialResult = [], initialGroups = new Set()) => {
+    const usedGroups = new Set(initialGroups);
+    const result = [...initialResult];
+    for (const item of pool) {
+      const group = item.groupZh || item.categoryZh || item.titleZh || "未分类";
+      if (!usedGroups.has(group)) {
+        result.push(item);
+        usedGroups.add(group);
+      }
+      if (result.length >= 5) break;
     }
+    return { result, usedGroups };
+  };
 
-    if (result.length >= 5) break;
+  const shouldAvoidTop = item => options.avoidLowIntent && ((item.roleScore ?? 0.5) <= 0.3 || (item.costScore ?? 0.5) <= 0.35);
+  const preferred = sorted.filter(item => !shouldAvoidTop(item));
+  const avoided = sorted.filter(shouldAvoidTop);
+  let { result, usedGroups } = build(preferred);
+  if (result.length < 5) {
+    ({ result } = build(avoided, result, usedGroups));
   }
-
   return result;
 }
 
@@ -1574,7 +1968,7 @@ function calculateCareerMatches(profile) {
       mismatchPenalty(profile.deepPreferences, career.deepPreferences, 0.06);
     const mbtiScore = career.mbti?.includes(inferredMbti) ? 1 : 0.45;
     const userMbtiBonus = userMbti !== "unknown" && career.mbti?.includes(userMbti) ? 0.02 : 0;
-    let finalScore =
+    const baseScore =
       riasecScore * 0.20 +
       deepPreferenceScore * 0.20 +
       preferencesScore * 0.15 +
@@ -1586,11 +1980,28 @@ function calculateCareerMatches(profile) {
       dominantBonus -
       penalties +
       userMbtiBonus;
+    const broadField = mapCareerFieldToBroadField(career.careerField);
+    const roleScore = profile.careerRolePreference?.[broadField] ?? 0.5;
+    const costScore = profile.costTolerance?.[broadField] ?? 0.5;
+    let finalScore =
+      baseScore * 0.65 +
+      roleScore * 0.20 +
+      costScore * 0.15;
+    if (roleScore <= 0.3) {
+      finalScore -= 0.18;
+    }
+    if (costScore <= 0.35) {
+      finalScore -= 0.12;
+    }
     finalScore = Math.max(0, Math.min(1, finalScore));
     const reasons = generateCareerReasons(profile, career);
     const risks = generateCareerRisks(profile, career);
     return {
       ...career,
+      broadField,
+      baseScore,
+      roleScore,
+      costScore,
       rawScore: finalScore,
       score: Math.round(finalScore * 100),
       reasonsZh: reasons.zh,
@@ -1599,7 +2010,7 @@ function calculateCareerMatches(profile) {
       risksEn: risks.en
     };
   });
-  return dedupeCareerMatches(rawMatches);
+  return dedupeCareerMatches(rawMatches, { avoidLowIntent: true });
 }
 
 function generateCareerReasons(profile, career) {
@@ -1772,6 +2183,8 @@ function renderCareerCards(careerMatches) {
     const physical = item.physicalDemand >= 0.7 ? (lang === "zh" ? "高" : "High") : item.physicalDemand >= 0.4 ? (lang === "zh" ? "中" : "Medium") : (lang === "zh" ? "低" : "Low");
     const stability = item.stabilityLevel >= 0.7 ? (lang === "zh" ? "高" : "High") : item.stabilityLevel >= 0.4 ? (lang === "zh" ? "中" : "Medium") : (lang === "zh" ? "低" : "Low");
     const risk = item.riskLevel >= 0.7 ? (lang === "zh" ? "高" : "High") : item.riskLevel >= 0.4 ? (lang === "zh" ? "中" : "Medium") : (lang === "zh" ? "低" : "Low");
+    const roleLevel = levelText(item.roleScore);
+    const costLevel = levelText(item.costScore);
     const reasons = lang === "zh" ? item.reasonsZh : item.reasonsEn;
     const risks = lang === "zh" ? item.risksZh : item.risksEn;
     return `
@@ -1779,12 +2192,29 @@ function renderCareerCards(careerMatches) {
         <strong>${lang === "zh" ? item.titleZh : item.titleEn}</strong>
         <p>${lang === "zh" ? item.categoryZh : item.categoryEn}</p>
         <p>${lang === "zh" ? "匹配度" : "Match"}：${item.score}%</p>
+        <p>${lang === "zh" ? "职业化意愿" : "Career intention"}：${roleLevel} · ${lang === "zh" ? "代价接受度" : "Cost tolerance"}：${costLevel}</p>
         <p>${lang === "zh" ? "体力要求" : "Physical"}：${physical} · ${lang === "zh" ? "稳定性" : "Stability"}：${stability} · ${lang === "zh" ? "风险水平" : "Risk"}：${risk}</p>
         <p><strong>${lang === "zh" ? "推荐理由" : "Reasons"}：</strong>${(reasons || []).join(" ")}</p>
         <p><strong>${lang === "zh" ? "注意事项" : "Notes"}：</strong>${(risks || []).join(" ")}</p>
       </div>
     `;
   }).join("");
+}
+
+function levelText(value) {
+  const score = normalizeScore(value);
+  if (score >= 0.68) return lang === "zh" ? "高" : "High";
+  if (score >= 0.38) return lang === "zh" ? "中" : "Medium";
+  return lang === "zh" ? "低" : "Low";
+}
+
+function renderInterestCareerNote() {
+  return `
+    <div class="card" style="background:#fff;margin-top:12px;width:100%">
+      <strong>${lang === "zh" ? "兴趣与职业意愿说明" : "Interest and Career Intention Note"}</strong>
+      <p>${lang === "zh" ? "你对某个领域感兴趣，并不一定意味着你适合或愿意把它作为长期职业。本系统会区分“兴趣爱好”“副业探索”“主要职业方向”以及你对该职业现实代价的接受程度，因此部分高兴趣领域可能不会直接进入推荐职业。" : "Being interested in a field does not necessarily mean you are suited for or willing to make it a long-term career. This system distinguishes hobbies, side exploration, main career direction, and your tolerance for real career costs, so some high-interest fields may not directly enter the recommendations."}</p>
+    </div>
+  `;
 }
 
 function renderDirections(list) {
@@ -1891,89 +2321,93 @@ function safeGenerateReport(profile, scores, mbtiPred) {
   }
 }
 
+function buildScores() {
+  const basicQs = questions.filter(q => q[1] === "basic");
+  const adaptiveQs = (adaptiveTake.length ? adaptiveTake : questions.filter(q => q[1] === "adaptive").slice(0, 24)).concat(followupTake || []);
+  const valuesQs = questions.filter(q => q[1] === "values");
+  const skillsQs = questions.filter(q => q[1] === "skills");
+  return {
+    mbti: {
+      E: avgScore(basicQs, "E"), I: avgScore(basicQs, "I"),
+      S: avgScore(basicQs, "S"), N: avgScore(basicQs, "N"),
+      T: avgScore(basicQs, "T"), F: avgScore(basicQs, "F"),
+      J: avgScore(basicQs, "J"), P: avgScore(basicQs, "P")
+    },
+    bigFive: {
+      Openness: avgScore(basicQs, "Openness"),
+      Conscientiousness: avgScore(basicQs, "Conscientiousness"),
+      Extraversion: avgScore(basicQs, "Extraversion"),
+      Agreeableness: avgScore(basicQs, "Agreeableness"),
+      Neuroticism: avgScore(basicQs, "Neuroticism")
+    },
+    riasec: {
+      Realistic: avgScore(adaptiveQs, "Realistic"),
+      Investigative: avgScore(adaptiveQs, "Investigative"),
+      Artistic: avgScore(adaptiveQs, "Artistic"),
+      Social: avgScore(adaptiveQs, "Social"),
+      Enterprising: avgScore(adaptiveQs, "Enterprising"),
+      Conventional: avgScore(adaptiveQs, "Conventional")
+    },
+    values: {
+      Wealth: avgScore(valuesQs, "Wealth"),
+      Stability: avgScore(valuesQs, "Stability"),
+      Freedom: avgScore(valuesQs, "Freedom"),
+      Achievement: avgScore(valuesQs, "Achievement"),
+      Influence: avgScore(valuesQs, "Influence"),
+      SocialImpact: avgScore(valuesQs, "SocialImpact"),
+      WorkLifeBalance: avgScore(valuesQs, "WorkLifeBalance")
+    },
+    workStyle: {
+      Leadership: avgScore(adaptiveQs, "Leadership"),
+      Collaboration: avgScore(adaptiveQs, "Collaboration"),
+      DeepWork: avgScore(adaptiveQs, "DeepWork"),
+      Creativity: avgScore(adaptiveQs, "Creativity"),
+      Execution: avgScore(adaptiveQs, "Execution"),
+      RiskTolerance: avgScore(adaptiveQs, "RiskTolerance")
+    },
+    skills: {
+      Logic: avgScore(skillsQs, "Logic"),
+      Expression: avgScore(skillsQs, "Expression"),
+      Execution: avgScore(skillsQs, "Execution"),
+      Creativity: avgScore(skillsQs, "Creativity"),
+      Learning: avgScore(skillsQs, "Learning"),
+      Organization: avgScore(skillsQs, "Organization"),
+      Empathy: avgScore(skillsQs, "Empathy"),
+      StressTolerance: avgScore(skillsQs, "StressTolerance"),
+      Leadership: avgScore(skillsQs, "Leadership"),
+      Collaboration: avgScore(skillsQs, "Collaboration")
+    },
+    preferences: {
+      physicalPreference: Math.max(avgScore(adaptiveQs, "Realistic"), avgScore(skillsQs, "Execution")) / 100,
+      stabilityPreference: avgScore(valuesQs, "Stability") / 100,
+      riskTolerance: avgScore(adaptiveQs, "RiskTolerance") / 100,
+      competitionPreference: Math.max(avgScore(adaptiveQs, "competitionPreference"), avgScore(adaptiveQs, "Enterprising")) / 100,
+      gameInterest: Math.max(avgScore(adaptiveQs, "gameInterest"), avgScore(adaptiveQs, "esportsPreference"), avgScore(adaptiveQs, "Enterprising"), avgScore(adaptiveQs, "Creativity")) / 100,
+      outdoorPreference: avgScore(adaptiveQs, "Realistic") / 100,
+      handsOnPreference: Math.max(avgScore(adaptiveQs, "handsOnPreference"), avgScore(adaptiveQs, "Realistic")) / 100
+    },
+    deepPreferences: {
+      foodCraftPreference: avgScore(adaptiveQs, "foodCraftPreference") / 100,
+      mechanicalPreference: avgScore(adaptiveQs, "mechanicalPreference") / 100,
+      natureAnimalPreference: avgScore(adaptiveQs, "natureAnimalPreference") / 100,
+      careServicePreference: Math.max(avgScore(adaptiveQs, "careServicePreference"), avgScore(adaptiveQs, "Social")) / 100,
+      sportPerformancePreference: avgScore(adaptiveQs, "sportPerformancePreference") / 100,
+      esportsPreference: avgScore(adaptiveQs, "esportsPreference") / 100,
+      visualCraftPreference: avgScore(adaptiveQs, "visualCraftPreference") / 100,
+      writingContentPreference: avgScore(adaptiveQs, "writingContentPreference") / 100,
+      analysisPreference: Math.max(avgScore(adaptiveQs, "analysisPreference"), avgScore(adaptiveQs, "Investigative")) / 100,
+      communicationPreference: Math.max(avgScore(adaptiveQs, "communicationPreference"), avgScore(adaptiveQs, "Social")) / 100,
+      examStabilityPreference: Math.max(avgScore(adaptiveQs, "examStabilityPreference"), avgScore(adaptiveQs, "Conventional")) / 100
+    }
+  };
+}
+
 function finish() {
   document.getElementById("loading").classList.remove("hidden");
   document.getElementById("loading").scrollIntoView({ behavior: "smooth", block: "start" });
   setTimeout(() => {
     try {
-    const basicQs = questions.filter(q => q[1] === "basic");
-    const adaptiveQs = (adaptiveTake.length ? adaptiveTake : questions.filter(q => q[1] === "adaptive").slice(0, 24)).concat(followupTake || []);
-    const valuesQs = questions.filter(q => q[1] === "values");
-    const skillsQs = questions.filter(q => q[1] === "skills");
-    const scores = {
-      mbti: {
-        E: avgScore(basicQs, "E"), I: avgScore(basicQs, "I"),
-        S: avgScore(basicQs, "S"), N: avgScore(basicQs, "N"),
-        T: avgScore(basicQs, "T"), F: avgScore(basicQs, "F"),
-        J: avgScore(basicQs, "J"), P: avgScore(basicQs, "P")
-      },
-      bigFive: {
-        Openness: avgScore(basicQs, "Openness"),
-        Conscientiousness: avgScore(basicQs, "Conscientiousness"),
-        Extraversion: avgScore(basicQs, "Extraversion"),
-        Agreeableness: avgScore(basicQs, "Agreeableness"),
-        Neuroticism: avgScore(basicQs, "Neuroticism")
-      },
-      riasec: {
-        Realistic: avgScore(adaptiveQs, "Realistic"),
-        Investigative: avgScore(adaptiveQs, "Investigative"),
-        Artistic: avgScore(adaptiveQs, "Artistic"),
-        Social: avgScore(adaptiveQs, "Social"),
-        Enterprising: avgScore(adaptiveQs, "Enterprising"),
-        Conventional: avgScore(adaptiveQs, "Conventional")
-      },
-      values: {
-        Wealth: avgScore(valuesQs, "Wealth"),
-        Stability: avgScore(valuesQs, "Stability"),
-        Freedom: avgScore(valuesQs, "Freedom"),
-        Achievement: avgScore(valuesQs, "Achievement"),
-        Influence: avgScore(valuesQs, "Influence"),
-        SocialImpact: avgScore(valuesQs, "SocialImpact"),
-        WorkLifeBalance: avgScore(valuesQs, "WorkLifeBalance")
-      },
-      workStyle: {
-        Leadership: avgScore(adaptiveQs, "Leadership"),
-        Collaboration: avgScore(adaptiveQs, "Collaboration"),
-        DeepWork: avgScore(adaptiveQs, "DeepWork"),
-        Creativity: avgScore(adaptiveQs, "Creativity"),
-        Execution: avgScore(adaptiveQs, "Execution"),
-        RiskTolerance: avgScore(adaptiveQs, "RiskTolerance")
-      },
-      skills: {
-        Logic: avgScore(skillsQs, "Logic"),
-        Expression: avgScore(skillsQs, "Expression"),
-        Execution: avgScore(skillsQs, "Execution"),
-        Creativity: avgScore(skillsQs, "Creativity"),
-        Learning: avgScore(skillsQs, "Learning"),
-        Organization: avgScore(skillsQs, "Organization"),
-        Empathy: avgScore(skillsQs, "Empathy"),
-        StressTolerance: avgScore(skillsQs, "StressTolerance"),
-        Leadership: avgScore(skillsQs, "Leadership"),
-        Collaboration: avgScore(skillsQs, "Collaboration")
-      },
-      preferences: {
-        physicalPreference: Math.max(avgScore(adaptiveQs, "Realistic"), avgScore(skillsQs, "Execution")) / 100,
-        stabilityPreference: avgScore(valuesQs, "Stability") / 100,
-        riskTolerance: avgScore(adaptiveQs, "RiskTolerance") / 100,
-        competitionPreference: Math.max(avgScore(adaptiveQs, "competitionPreference"), avgScore(adaptiveQs, "Enterprising")) / 100,
-        gameInterest: Math.max(avgScore(adaptiveQs, "gameInterest"), avgScore(adaptiveQs, "esportsPreference"), avgScore(adaptiveQs, "Enterprising"), avgScore(adaptiveQs, "Creativity")) / 100,
-        outdoorPreference: avgScore(adaptiveQs, "Realistic") / 100,
-        handsOnPreference: Math.max(avgScore(adaptiveQs, "handsOnPreference"), avgScore(adaptiveQs, "Realistic")) / 100
-      },
-      deepPreferences: {
-        foodCraftPreference: avgScore(adaptiveQs, "foodCraftPreference") / 100,
-        mechanicalPreference: avgScore(adaptiveQs, "mechanicalPreference") / 100,
-        natureAnimalPreference: avgScore(adaptiveQs, "natureAnimalPreference") / 100,
-        careServicePreference: Math.max(avgScore(adaptiveQs, "careServicePreference"), avgScore(adaptiveQs, "Social")) / 100,
-        sportPerformancePreference: avgScore(adaptiveQs, "sportPerformancePreference") / 100,
-        esportsPreference: avgScore(adaptiveQs, "esportsPreference") / 100,
-        visualCraftPreference: avgScore(adaptiveQs, "visualCraftPreference") / 100,
-        writingContentPreference: avgScore(adaptiveQs, "writingContentPreference") / 100,
-        analysisPreference: Math.max(avgScore(adaptiveQs, "analysisPreference"), avgScore(adaptiveQs, "Investigative")) / 100,
-        communicationPreference: Math.max(avgScore(adaptiveQs, "communicationPreference"), avgScore(adaptiveQs, "Social")) / 100,
-        examStabilityPreference: Math.max(avgScore(adaptiveQs, "examStabilityPreference"), avgScore(adaptiveQs, "Conventional")) / 100
-      }
-    };
+    const scores = buildScores();
     const mbtiPred = inferMBTI(scores.mbti);
     const profile = buildProfile(scores, mbtiSelf);
     console.log("answers =", answers);
@@ -1993,7 +2427,7 @@ function renderReport(r) {
   document.getElementById("consistency").textContent = r.consistency;
   document.getElementById("valuesSummary").textContent = r.valuesSummary;
   document.getElementById("bigFive").innerHTML = renderBigFive(r.profile);
-  document.getElementById("careers").innerHTML = renderCareerCards((r.careerMatches || []).slice(0, 5));
+  document.getElementById("careers").innerHTML = renderCareerCards((r.careerMatches || []).slice(0, 5)) + renderInterestCareerNote();
   document.getElementById("avoid").innerHTML = renderDirections(r.unsuitableDirections);
   document.getElementById("roadmap").innerHTML = renderRoadmap(r.roadmap);
   document.getElementById("learning").innerHTML = renderLearning(r.learningAdvice);
@@ -2041,3 +2475,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
