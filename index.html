@@ -2447,11 +2447,6 @@ function hideIntroModal() {
 }
 
 function closeIntroModal() {
-  localStorage.setItem(
-    "career_planner_intro_read",
-    "true"
-  );
-
   hideIntroModal();
 }
 
@@ -2463,14 +2458,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderReport(state.report);
     document.getElementById("report").classList.remove("hidden");
   }
-  const introRead =
-    localStorage.getItem(
-      "career_planner_intro_read"
-    );
-
-  if (!introRead) {
-    openIntroModal();
-  }
+  openIntroModal();
 });
 </script>
 </body>
